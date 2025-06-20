@@ -1,0 +1,183 @@
+import React, { useState, useMemo } from 'react';
+import { Search, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+import UserData from '../data/UserData';
+
+const BuyerAccount = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const navigate = useNavigate();
+
+  const processedBuyers = useMemo(() => {
+    // Search
+    let filtered = UserData.filter((u) => {
+      const term = searchTerm.toLowerCase();
+      return (
+        u.id.toLowerCase().includes(term) ||
+        u.name.toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term) ||
+        u.phone.toLowerCase().includes(term) ||
+        u.address.toLowerCase().includes(term) ||
+        u.company.toLowerCase().includes(term) ||
+        u.gstNumber.toLowerCase().includes(term) ||
+        u.panNumber.toLowerCase().includes(term)
+      );
+    });
+
+    // Sorting
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // Pagination
+    const start = (currentPage - 1) * itemsPerPage;
+    return filtered.slice(start, start + itemsPerPage);
+  }, [searchTerm, sortConfig, currentPage]);
+
+  const totalPages = Math.ceil(
+    UserData.filter((u) => {
+      const term = searchTerm.toLowerCase();
+      return (
+        u.id.toLowerCase().includes(term) ||
+        u.name.toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term)
+      );
+    }).length / itemsPerPage
+  );
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
+    setSortConfig({ key, direction });
+  };
+
+  const handleRowClick = (slug) => {
+    navigate(`/accounts/buyers/${slug}`);
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-[#caf0f8] p-4 md:p-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-[#05014A]">Buyers Accounts</h1>
+
+          <div className="relative w-full md:w-96">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Search buyers..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#05014A] focus:border-transparent"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        </div>
+      </header>
+
+      {/* Table */}
+      <main className="flex-1 p-4 md:p-6">
+        <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#05014A] text-white">
+                <tr>
+                  <th className="p-3 text-left">No.</th>
+                  {['id', 'name', 'email', 'phone', 'address', 'company', 'gstNumber', 'panNumber'].map((col) => (
+                    <th
+                      key={col}
+                      className="p-3 text-left cursor-pointer hover:bg-[#03012e] transition-colors"
+                      onClick={() => handleSort(col)}
+                    >
+                      <div className="flex items-center capitalize">
+                        {col}
+                        <ChevronDown
+                          className={`ml-1 transition-transform ${
+                            sortConfig.key === col && sortConfig.direction === 'desc' ? 'rotate-180' : ''
+                          }`}
+                          size={16}
+                        />
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {processedBuyers.length > 0 ? (
+                  processedBuyers.map((buyer, index) => (
+                    <tr
+                      key={buyer.id}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => handleRowClick(buyer.slug)}
+                    >
+                      <td className="p-3">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                      <td className="p-3">{buyer.id}</td>
+                      <td className="p-3 font-medium text-gray-900">{buyer.name}</td>
+                      <td className="p-3">{buyer.email}</td>
+                      <td className="p-3">{buyer.phone}</td>
+                      <td className="p-3">{buyer.address}</td>
+                      <td className="p-3">{buyer.company}</td>
+                      <td className="p-3">{buyer.gstNumber}</td>
+                      <td className="p-3">{buyer.panNumber}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="p-6 text-center text-gray-500">
+                      No buyers found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6">
+              <div className="text-sm text-gray-700">
+                Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
+                <span className="font-medium">
+                  {Math.min(currentPage * itemsPerPage, processedBuyers.length + (currentPage - 1) * itemsPerPage)}
+                </span>{' '}
+                of <span className="font-medium">{UserData.length}</span> results
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === 1 ? 'bg-gray-100 cursor-not-allowed' : 'bg-[#05014A] text-white hover:bg-[#03012e]'
+                  }`}
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === totalPages ? 'bg-gray-100 cursor-not-allowed' : 'bg-[#05014A] text-white hover:bg-[#03012e]'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default BuyerAccount;
