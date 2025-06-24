@@ -1,9 +1,9 @@
 const OrderData = [
   // Radha Metals
   {
-    id: "ORD-001",
+    id: "AGS-ORD-001",
     slug: "radha-metals",
-    orderNo: "ORD-001",
+    orderNo: "AGS-ORD-001",
     date: "23/04/2023",
     time: "10:15 AM",
     productDetails: [
@@ -19,9 +19,9 @@ const OrderData = [
     paymentStatus: "paid",
   },
   {
-    id: "ORD-002",
+    id: "AGS-ORD-002",
     slug: "radha-metals",
-    orderNo: "ORD-002",
+    orderNo: "AGS-ORD-002",
     date: "24/04/2023",
     time: "03:45 PM",
     productDetails: [
@@ -37,9 +37,9 @@ const OrderData = [
     paymentStatus: "unpaid",
   },
   {
-    id: "ORD-003",
+    id: "AGS-ORD-003",
     slug: "radha-metals",
-    orderNo: "ORD-003",
+    orderNo: "AGS-ORD-003",
     date: "25/04/2023",
     time: "11:20 AM",
     productDetails: [
@@ -57,9 +57,9 @@ const OrderData = [
 
   // Gayatri Pujan Samugri
   {
-    id: "ORD-004",
+    id: "AGS-ORD-004",
     slug: "gayatri-pujan-samugri",
-    orderNo: "ORD-004",
+    orderNo: "AGS-ORD-004",
     date: "23/04/2023",
     time: "12:00 PM",
     productDetails: [
@@ -75,9 +75,9 @@ const OrderData = [
     paymentStatus: "unpaid",
   },
   {
-    id: "ORD-005",
+    id: "AGS-ORD-005",
     slug: "gayatri-pujan-samugri",
-    orderNo: "ORD-005",
+    orderNo: "AGS-ORD-005",
     date: "24/04/2023",
     time: "01:45 PM",
     productDetails: [
@@ -93,9 +93,9 @@ const OrderData = [
     paymentStatus: "paid",
   },
   {
-    id: "ORD-006",
+    id: "AGS-ORD-006",
     slug: "gayatri-pujan-samugri",
-    orderNo: "ORD-006",
+    orderNo: "AGS-ORD-006",
     date: "25/04/2023",
     time: "09:30 AM",
     productDetails: [
@@ -113,9 +113,9 @@ const OrderData = [
 
   // Shri Laxmi Kumkum Center
   {
-    id: "ORD-007",
+    id: "AGS-ORD-007",
     slug: "shri-laxmi-kumkum-center",
-    orderNo: "ORD-007",
+    orderNo: "AGS-ORD-007",
     date: "26/04/2023",
     time: "10:00 AM",
     productDetails: [
@@ -131,9 +131,9 @@ const OrderData = [
     paymentStatus: "paid",
   },
   {
-    id: "ORD-008",
+    id: "AGS-ORD-008",
     slug: "shri-laxmi-kumkum-center",
-    orderNo: "ORD-008",
+    orderNo: "AGS-ORD-008",
     date: "27/04/2023",
     time: "11:45 AM",
     productDetails: [
@@ -149,9 +149,9 @@ const OrderData = [
     paymentStatus: "unpaid",
   },
   {
-    id: "ORD-009",
+    id: "AGS-ORD-009",
     slug: "shri-laxmi-kumkum-center",
-    orderNo: "ORD-009",
+    orderNo: "AGS-ORD-009",
     date: "28/04/2023",
     time: "09:30 AM",
     productDetails: [
@@ -169,9 +169,9 @@ const OrderData = [
 
   // Krishna Corporation
   {
-    id: "ORD-010",
+    id: "AGS-ORD-010",
     slug: "krishna-corporation",
-    orderNo: "ORD-010",
+    orderNo: "AGS-ORD-010",
     date: "26/04/2023",
     time: "11:30 AM",
     productDetails: [
@@ -187,9 +187,9 @@ const OrderData = [
     paymentStatus: "unpaid",
   },
   {
-    id: "ORD-011",
+    id: "AGS-ORD-011",
     slug: "krishna-corporation",
-    orderNo: "ORD-011",
+    orderNo: "AGS-ORD-011",
     date: "27/04/2023",
     time: "10:00 AM",
     productDetails: [
@@ -205,9 +205,9 @@ const OrderData = [
     paymentStatus: "paid",
   },
   {
-    id: "ORD-012",
+    id: "AGS-ORD-012",
     slug: "krishna-corporation",
-    orderNo: "ORD-012",
+    orderNo: "AGS-ORD-012",
     date: "28/04/2023",
     time: "02:00 PM",
     productDetails: [
@@ -225,9 +225,9 @@ const OrderData = [
 
   // Hari Om Poojan Samigri
   {
-    id: "ORD-013",
+    id: "AGS-ORD-013",
     slug: "hari-om-poojan-samigri",
-    orderNo: "ORD-013",
+    orderNo: "AGS-ORD-013",
     date: "29/04/2023",
     time: "11:00 AM",
     productDetails: [
@@ -243,9 +243,9 @@ const OrderData = [
     paymentStatus: "paid",
   },
   {
-    id: "ORD-014",
+    id: "AGS-ORD-014",
     slug: "hari-om-poojan-samigri",
-    orderNo: "ORD-014",
+    orderNo: "AGS-ORD-014",
     date: "30/04/2023",
     time: "10:15 AM",
     productDetails: [
@@ -263,9 +263,9 @@ const OrderData = [
 
   // SS Pooja Articles
   {
-    id: "ORD-015",
+    id: "AGS-ORD-015",
     slug: "ss-pooja-articles",
-    orderNo: "ORD-015",
+    orderNo: "AGS-ORD-015",
     date: "30/04/2023",
     time: "10:15 AM",
     productDetails: [
@@ -281,9 +281,9 @@ const OrderData = [
     paymentStatus: "paid",
   },
   {
-    id: "ORD-016",
+    id: "AGS-ORD-016",
     slug: "ss-pooja-articles",
-    orderNo: "ORD-016",
+    orderNo: "AGS-ORD-016",
     date: "30/04/2023",
     time: "10:15 AM",
     productDetails: [
@@ -299,9 +299,9 @@ const OrderData = [
     paymentStatus: "unpaid",
   },
   {
-    id: "ORD-017",
+    id: "AGS-ORD-017",
     slug: "ss-pooja-articles",
-    orderNo: "ORD-017",
+    orderNo: "AGS-ORD-017",
     date: "30/04/2023",
     time: "10:15 AM",
     productDetails: [

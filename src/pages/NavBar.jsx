@@ -2,16 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Gauge, FileText, Receipt, List, 
-  CreditCard, User, ClipboardList, Store, 
-  BarChart3, LogOut, ChevronDown, Menu, X
+  FileText, List, 
+  CreditCard, User, ClipboardList, 
+  LogOut, ChevronDown, Menu, X, Store, Package 
 } from 'lucide-react';
 
 // Navigation items array
 const navItems = [
-  { title: 'Dashboard', path: '/', icon: <Gauge />, color: '#03dac6' },
   { title: 'Invoice', path: '/invoice', icon: <FileText />, color: '#bb86fc' },
-  { title: 'Estimate', path: '/estimate', icon: <Receipt />, color: '#03dac6' },
   { title: 'Inventory', path: '/inventory', icon: <ClipboardList />, color: '#cf6679' },
   { title: 'Price List', path: '/price-list', icon: <List />, color: '#03dac6' },
   {
@@ -19,8 +17,9 @@ const navItems = [
     icon: <CreditCard />,
     color: '#bb86fc',
     dropdown: [
-      { title: 'Received', path: '/payments/received' },
-      { title: 'Sent', path: '/payments/sent' }
+      { title: 'Customers', path: '/payments/customers' },
+      { title: 'Suppliers', path: '/payments/received' }
+      
     ]
   },
   {
@@ -28,21 +27,19 @@ const navItems = [
     icon: <User />,
     color: '#03dac6',
     dropdown: [
-      { title: 'Sellers', path: '/accounts/sellers' },
-      { title: 'Buyers', path: '/accounts/buyers' }
+      { title: 'Customers', path: '/accounts/customers' },
+      { title: 'Suppliers', path: '/accounts/sellers' }
     ]
   },
   {
     title: 'Orders',
-    icon: <ClipboardList />,
+    icon: <Package  />,
     color: '#cf6679',
     dropdown: [
-      { title: 'Received', path: '/orders/received' },
-      { title: 'Sent', path: '/orders/sent' }
+      { title: 'Customers', path: '/orders/customers' },
+      { title: 'Suppliers', path: '/orders/received' },
     ]
   },
-  { title: 'Store', path: '/store', icon: <Store />, color: '#bb86fc' },
-  { title: 'Reports', path: '/reports', icon: <BarChart3 />, color: '#03dac6' }
 ];
 
 const Layout = ({ children }) => {

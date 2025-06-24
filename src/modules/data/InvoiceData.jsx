@@ -1,9 +1,9 @@
 const InvoiceData = [
     // Radha Metals
     {
-      id: "INV-001",
+      id: "AGS-INV-001",
       slug: "radha-metals",
-      invoiceNo: "INV-001",
+      invoiceNo: "AGS-INV-1",
       date: "23/04/2023",
       time: "10:15 AM",
       productDetails: [
@@ -18,9 +18,9 @@ const InvoiceData = [
       totalAmount: 4330,
     },
     {
-      id: "INV-002",
+      id: "AGS-INV-002",
       slug: "radha-metals",
-      invoiceNo: "INV-002",
+      invoiceNo: "AGS-INV-2",
       date: "24/04/2023",
       time: "03:45 PM",
       productDetails: [
@@ -35,9 +35,9 @@ const InvoiceData = [
       totalAmount: 2405,
     },
     {
-      id: "INV-003",
+      id: "AGS-INV-003",
       slug: "radha-metals",
-      invoiceNo: "INV-003",
+      invoiceNo: "AGS-INV-3",
       date: "25/04/2023",
       time: "11:20 AM",
       productDetails: [
@@ -54,9 +54,9 @@ const InvoiceData = [
   
     // Gayatri Pujan Samugri
     {
-      id: "INV-004",
+      id: "AGS-INV-004",
       slug: "gayatri-pujan-samugri",
-      invoiceNo: "INV-004",
+      invoiceNo: "AGS-INV-004",
       date: "23/04/2023",
       time: "12:00 PM",
       productDetails: [
@@ -71,9 +71,9 @@ const InvoiceData = [
       totalAmount: 1730,
     },
     {
-      id: "INV-005",
+      id: "AGS-INV-005",
       slug: "gayatri-pujan-samugri",
-      invoiceNo: "INV-005",
+      invoiceNo: "AGS-INV-005",
       date: "24/04/2023",
       time: "01:45 PM",
       productDetails: [
@@ -88,9 +88,9 @@ const InvoiceData = [
       totalAmount: 1700,
     },
     {
-      id: "INV-006",
+      id: "AGS-INV-006",
       slug: "gayatri-pujan-samugri",
-      invoiceNo: "INV-006",
+      invoiceNo: "AGS-INV-006",
       date: "25/04/2023",
       time: "09:30 AM",
       productDetails: [
@@ -107,9 +107,9 @@ const InvoiceData = [
   
     // Shri Laxmi Kumkum Center
     {
-      id: "INV-007",
+      id: "AGS-INV-007",
       slug: "shri-laxmi-kumkum-center",
-      invoiceNo: "INV-007",
+      invoiceNo: "AGS-INV-007",
       date: "26/04/2023",
       time: "10:00 AM",
       productDetails: [
@@ -124,9 +124,9 @@ const InvoiceData = [
       totalAmount: 1660,
     },
     {
-      id: "INV-008",
+      id: "AGS-INV-008",
       slug: "shri-laxmi-kumkum-center",
-      invoiceNo: "INV-008",
+      invoiceNo: "AGS-INV-008",
       date: "27/04/2023",
       time: "11:45 AM",
       productDetails: [
@@ -141,9 +141,9 @@ const InvoiceData = [
       totalAmount: 2020,
     },
     {
-      id: "INV-009",
+      id: "AGS-INV-009",
       slug: "shri-laxmi-kumkum-center",
-      invoiceNo: "INV-009",
+      invoiceNo: "AGS-INV-009",
       date: "28/04/2023",
       time: "09:30 AM",
       productDetails: [
@@ -160,9 +160,9 @@ const InvoiceData = [
   
     // Krishna Corporation
     {
-      id: "INV-010",
+      id: "AGS-INV-010",
       slug: "krishna-corporation",
-      invoiceNo: "INV-010",
+      invoiceNo: "AGS-INV-010",
       date: "26/04/2023",
       time: "11:30 AM",
       productDetails: [
@@ -177,9 +177,9 @@ const InvoiceData = [
       totalAmount: 1870,
     },
     {
-      id: "INV-011",
+      id: "AGS-INV-011",
       slug: "krishna-corporation",
-      invoiceNo: "INV-011",
+      invoiceNo: "AGS-INV-011",
       date: "27/04/2023",
       time: "10:00 AM",
       productDetails: [
@@ -194,9 +194,9 @@ const InvoiceData = [
       totalAmount: 2055,
     },
     {
-      id: "INV-012",
+      id: "AGS-INV-012",
       slug: "krishna-corporation",
-      invoiceNo: "INV-012",
+      invoiceNo: "AGS-INV-012",
       date: "28/04/2023",
       time: "02:00 PM",
       productDetails: [
@@ -213,9 +213,9 @@ const InvoiceData = [
   
     // Hari Om Poojan Samigri
     {
-      id: "INV-013",
+      id: "AGS-INV-013",
       slug: "hari-om-poojan-samigri",
-      invoiceNo: "INV-013",
+      invoiceNo: "AGS-INV-013",
       date: "29/04/2023",
       time: "11:00 AM",
       productDetails: [
@@ -230,9 +230,9 @@ const InvoiceData = [
       totalAmount: 2000
     },
     {
-      id: "INV-014",
+      id: "AGS-INV-014",
       slug: "hari-om-poojan-samigri",
-      invoiceNo: "INV-014",
+      invoiceNo: "AGS-INV-014",
       date: "30/04/2023",
       time: "10:15 AM",
       productDetails: [
@@ -249,9 +249,9 @@ const InvoiceData = [
   
     // SS Pooja Articles
     {
-      id: "INV-015",
+      id: "AGS-INV-015",
       slug: "ss-pooja-articles",
-      invoiceNo: "INV-015",
+      invoiceNo: "AGS-INV-015",
       date: "30/04/2023",
       time: "10:15 AM",
       productDetails: [
@@ -266,9 +266,9 @@ const InvoiceData = [
       totalAmount: 1870,
     },
     {
-      id: "INV-016",
+      id: "AGS-INV-016",
       slug: "ss-pooja-articles",
-      invoiceNo: "INV-016",
+      invoiceNo: "AGS-INV-016",
       date: "30/04/2023",
       time: "10:15 AM",
       productDetails: [
@@ -283,9 +283,9 @@ const InvoiceData = [
       totalAmount: 4330,
     },
     {
-      id: "INV-017",
+      id: "AGS-INV-017",
       slug: "ss-pooja-articles",
-      invoiceNo: "INV-017",
+      invoiceNo: "AGS-INV-017",
       date: "30/04/2023",
       time: "10:15 AM",
       productDetails: [

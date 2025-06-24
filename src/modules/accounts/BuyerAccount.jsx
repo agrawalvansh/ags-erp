@@ -59,7 +59,7 @@ const BuyerAccount = () => {
   };
 
   const handleRowClick = (slug) => {
-    navigate(`/accounts/buyers/${slug}`);
+    navigate(`/accounts/customers/${slug}`);
   };
 
   return (
@@ -67,7 +67,7 @@ const BuyerAccount = () => {
       {/* Header */}
       <header className="bg-[#caf0f8] p-4 md:p-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#05014A]">Buyers Accounts</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#05014A]">Customer's Accounts</h1>
 
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />

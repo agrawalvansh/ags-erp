@@ -6,7 +6,6 @@ import { Routes, Route } from 'react-router-dom';
 import Invoice from './invoice/Invoice';
 import Inventory from './inventory/Inventory';
 import PriceList from './priceList/Price_List';
-import Estimate from './estimate/Estimate';
 import PaymentsRecived from './payments/PaymentsRecived';
 import OrdersRecived from './orders/OrdersRecived';
 import OrderDetail from './orders/OrderDetail';
@@ -22,14 +21,13 @@ const ModulesRouter = () => (
       <Route path="inventory" element={<Inventory />} />
       <Route path="inventory/add" element={<AddInventoryProduct />} />
       <Route path="price-list" element={<PriceList />} />
-      <Route path="estimate" element={<Estimate />} />
-      <Route path="payments/received" element={<PaymentsRecived />} />
+      <Route path="payments/customers" element={<PaymentsRecived />} />
       {/* Accounts / Buyers */}
-      <Route path="accounts/buyers" element={<BuyerAccount />} />
-      <Route path="accounts/buyers/:slug" element={<BuyerAccountDetail />} />
+      <Route path="accounts/customers" element={<BuyerAccount />} />
+      <Route path="accounts/customers/:slug" element={<BuyerAccountDetail />} />
       {/* Orders */}
-      <Route path="orders/received" element={<OrdersRecived />} />
-      <Route path="orders/received/:orderNo" element={<OrderDetail />} />
+      <Route path="orders/customers" element={<OrdersRecived />} />
+      <Route path="orders/customers/:orderNo" element={<OrderDetail />} />
     </Routes>
   </div>
 );

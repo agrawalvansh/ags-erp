@@ -1,9 +1,10 @@
 //Check the sorting functionality
-
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, Plus, Search } from 'lucide-react';
 import Data from '../data/Data';
 const Inventory = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -82,7 +83,7 @@ const Inventory = () => {
             
             <button 
               className="flex items-center justify-center bg-[#05014A] text-white px-4 py-2 rounded-lg hover:bg-[#03012e] transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#05014A] whitespace-nowrap cursor-pointer"
-              onClick={() => window.location.href = '/inventory/add'}
+              onClick={() => navigate('/inventory/add')}
             >
               <Plus className="mr-2" size={20} />
               Add New Product

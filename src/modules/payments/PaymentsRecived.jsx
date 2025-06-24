@@ -68,7 +68,7 @@ const PaymentsRecived = () => {
       {/* Header */}
       <header className="bg-[#caf0f8] p-4 md:p-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#05014A]">Payments Received</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#05014A]">Customer's Payments</h1>
           
           <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
             <div className="relative w-full">

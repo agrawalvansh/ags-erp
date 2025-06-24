@@ -2,9 +2,9 @@ const Data = [
   {
     id: 1,
     productName: "Vastu Deep - 000",
-    code: "DIY-V-000",
+    code: "AGS-PROD-DIY-V-000",
     stock: 250,
-    quantity: 12,
+    quantity: 12.25,
     packingType: 'kg',
     costPrice: 38,
     sellingPrice: 45

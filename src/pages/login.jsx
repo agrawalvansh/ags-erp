@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaUser, FaLock, FaGoogle, FaGithub } from 'react-icons/fa';
 import { FiArrowRight } from 'react-icons/fi';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -14,7 +15,7 @@ const LoginPage = () => {
     e.preventDefault();
     console.log('Form submitted:', formData);
     // Redirect to home page on form submission
-    Navigate("/");
+    navigate("/invoice");
   };
 
   const handleChange = (e) => {
