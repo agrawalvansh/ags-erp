@@ -20,6 +20,43 @@ const AddItemForm = ({ newItem, setNewItem, handleAddItem, products, formErrors 
     );
   }, [products, newItem.productName]);
 
+  // Utility to normalize different packing type values returned from backend
+  // Utility to format product names (hyphens to spaces and capitalize words)
+  const formatName = (name) => {
+    if (!name) return '';
+    return name
+      .replace(/-/g, ' ')
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  };
+
+  // Utility to normalize packing type values and map them to valid dropdown option values
+  const mapPackingType = (rawType) => {
+    if (!rawType) return 'PCS'; // default fallback
+    const upper = rawType.toString().trim().toUpperCase();
+
+    if (['PC', 'PCS'].includes(upper)) return 'PCS';
+    if (['KG', 'KGS'].includes(upper)) return 'KGS';
+    if (['DZ', 'DOZ', 'DOZEN'].includes(upper)) return 'DOZEN'; // Represent "Dozen" as BOX
+    if (['BOX', 'BOXES'].includes(upper)) return 'BOX';
+    if (['KODI'].includes(upper)) return 'KODI';
+
+    return upper; // unknown types shown as-is
+  };
+
+  const handleProductSelect = (product) => {
+    setNewItem({
+      ...newItem,
+      code: product.code,
+      productName: `${formatName(product.name)}${product.size ? ' ' + product.size : ''}`.trim(),
+      sellingPrice: (product.selling_price ?? product.sellingPrice ?? 0).toString(),
+      packingType: mapPackingType(product.packing_type || product.packingType),
+    });
+    setShowProdDropdown(false);
+    setHighlightedIndex(-1);
+  };
+
   // Handle keyboard navigation
   const handleKeyDown = (e) => {
     if (!showProdDropdown) return;
@@ -47,31 +84,6 @@ const AddItemForm = ({ newItem, setNewItem, handleAddItem, products, formErrors 
     }
   };
 
-  // Utility to normalize different packing type values returned from backend and map them to valid dropdown option values
-  const mapPackingType = (rawType) => {
-    if (!rawType) return 'PCS'; // default fallback
-    const upper = rawType.toString().trim().toUpperCase();
-
-    if (['PC', 'PCS'].includes(upper)) return 'PCS';
-    if (['KG', 'KGS'].includes(upper)) return 'KGS';
-    if (['DZ', 'DOZ', 'DOZEN'].includes(upper)) return 'DOZEN';
-    if (['BOX', 'BOXES'].includes(upper)) return 'BOX';
-    if (['KODI'].includes(upper)) return 'KODI';
-
-    return upper; // unknown types shown as-is
-  };
-
-  const handleProductSelect = (product) => {
-    setNewItem({
-      ...newItem,
-      code: product.code,
-      productName: `${product.name}${product.size ? ' ' + product.size : ''}`.trim(),
-      sellingPrice: (product.selling_price ?? product.sellingPrice ?? 0).toString(),
-      packingType: mapPackingType(product.packing_type || product.packingType),
-    });
-    setShowProdDropdown(false);
-    setHighlightedIndex(-1);
-  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -93,15 +105,14 @@ const AddItemForm = ({ newItem, setNewItem, handleAddItem, products, formErrors 
         Add New Item
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-12 gap-4 items-end">
         {/* Product Search Field */}
-        <div className="relative" ref={prodWrapperRef}>
+        <div className="col-span-4 relative" ref={prodWrapperRef}>
           <label htmlFor="product-search" className="block text-sm font-medium text-gray-700 mb-1">
             Product Name
           </label>
           <div className="relative">
             <input
-              // id="product-search"
               type="text"
               value={newItem.productName}
               onFocus={() => {
@@ -126,7 +137,6 @@ const AddItemForm = ({ newItem, setNewItem, handleAddItem, products, formErrors 
             {/* Product Dropdown */}
             {showProdDropdown && (
               <div
-                // id="product-options"
                 className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
                 role="listbox"
               >
@@ -137,15 +147,15 @@ const AddItemForm = ({ newItem, setNewItem, handleAddItem, products, formErrors 
                       role="option"
                       aria-selected={highlightedIndex === index}
                       className={`cursor-pointer w-full text-left px-4 py-3 transition-colors flex items-center justify-between ${highlightedIndex === index
-                        ? 'bg-blue-50'
-                        : 'hover:bg-gray-50'
+                          ? 'bg-blue-50'
+                          : 'hover:bg-gray-50'
                         } ${index === 0 ? 'rounded-t-lg' : ''} ${index === filteredProducts.length - 1 ? 'rounded-b-lg' : ''
                         }`}
                       onClick={() => handleProductSelect(p)}
                       onMouseEnter={() => setHighlightedIndex(index)}
                     >
                       <div>
-                        <span className="font-medium block">{p.name}</span>
+                        <span className="font-medium block">{formatName(p.name)}</span>
                         {p.size && <span className="text-sm text-gray-600 mt-1">Size: {p.size}</span>}
                       </div>
                       <span className="text-sm font-medium text-gray-700">
@@ -164,38 +174,38 @@ const AddItemForm = ({ newItem, setNewItem, handleAddItem, products, formErrors 
             )}
           </div>
           {formErrors.productName && (
-            <p className="mt-1.5 text-sm text-red-600 flex items-center">
+            <p className="mt-1.5 text-sm text-red-600 flex items-center absolute">
               <AlertCircle size={16} className="mr-1" />
               {formErrors.productName}
             </p>
           )}
         </div>
 
-        {/* Quantity and Unit Fields */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="item-quantity" className="block text-sm font-medium text-gray-700 mb-1">
-              Quantity
-            </label>
-            <input
-              // id="item-quantity"
-              type="number"
-              min="0.001"
-              step="0.001"
-              value={newItem.quantity}
-              onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
-              className={`w-full px-4 py-2.5 border ${formErrors.quantity ? 'border-red-500' : 'border-gray-300'
-                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-              placeholder="0.000"
-            />
-            {formErrors.quantity && (
-              <p className="mt-1.5 text-sm text-red-600 flex items-center">
-                <AlertCircle size={16} className="mr-1" />
-                {formErrors.quantity}
-              </p>
-            )}
-          </div>
+        {/* Quantity Field */}
+        <div className="col-span-3">
+          <label htmlFor="item-quantity" className="block text-sm font-medium text-gray-700 mb-1">
+            Quantity
+          </label>
+          <input
+            type="number"
+            min="0.001"
+            step="0.001"
+            value={newItem.quantity}
+            onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
+            className={`w-full px-4 py-2.5 border ${formErrors.quantity ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            placeholder="0.000"
+          />
+          {formErrors.quantity && (
+            <p className="mt-1.5 text-sm text-red-600 flex items-center absolute">
+              <AlertCircle size={16} className="mr-1" />
+              {formErrors.quantity}
+            </p>
+          )}
+        </div>
 
+        {/* Unit Field */}
+        <div className="col-span-2">
           <div>
             <label htmlFor="item-unit" className="block text-sm font-medium text-gray-700 mb-1">
               Unit
@@ -218,40 +228,14 @@ const AddItemForm = ({ newItem, setNewItem, handleAddItem, products, formErrors 
               <option value="OTHER">Other</option>
             </select>
           </div>
-        </div>
 
-        {/* Rate Field */}
-        <div>
-          <label htmlFor="item-rate" className="block text-sm font-medium text-gray-700 mb-1">
-            Rate (₹)
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-            <input
-              // id="item-rate"
-              type="number"
-              min="0.01"
-              step="0.01"
-              value={newItem.sellingPrice}
-              onChange={(e) => setNewItem({ ...newItem, sellingPrice: e.target.value })}
-              className={`w-full pl-8 pr-4 py-2.5 border ${formErrors.sellingPrice ? 'border-red-500' : 'border-gray-300'
-                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-              placeholder="0.00"
-            />
-          </div>
-          {formErrors.sellingPrice && (
-            <p className="mt-1.5 text-sm text-red-600 flex items-center">
-              <AlertCircle size={16} className="mr-1" />
-              {formErrors.sellingPrice}
-            </p>
-          )}
         </div>
 
         {/* Add Button */}
-        <div className="flex items-end">
+        <div className="col-span-3">
           <button
             onClick={handleAddItem}
-            className="cursor-pointer w-full bg-[#05014A] hover:bg-[#0A0A47] text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2 font-medium shadow-md hover:shadow-lg"
+            className="cursor-pointer w-full bg-[#05014A] hover:bg-[#0A0A47] text-white px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center space-x-2 font-medium shadow-md hover:shadow-lg"
           >
             <Plus size={20} />
             <span>Add Item</span>
@@ -261,19 +245,18 @@ const AddItemForm = ({ newItem, setNewItem, handleAddItem, products, formErrors 
     </div>
   );
 };
-const Invoice = () => {
-  const wrapperRef = useRef(null);  // customer dropdown wrapper
+const order = () => {
+  const wrapperRef = useRef(null);  // supplier dropdown wrapper
   const printRef = useRef(null);
-  const { invoiceNo } = useParams();
+  const { orderId: orderNo } = useParams();
 
   // State declarations
-  const [invoiceItems, setInvoiceItems] = useState([]);
+  const [orderItems, setorderItems] = useState([]);
   const [newItem, setNewItem] = useState({
     code: '',
     productName: '',
     quantity: '',
     packingType: 'PCS',
-    sellingPrice: '',
   });
   const [total, setTotal] = useState(0);
   const [products, setProducts] = useState([]);
@@ -281,23 +264,53 @@ const Invoice = () => {
   const [freight, setFreight] = useState('');
   const [riksha, setRiksha] = useState('');
   const [buyer, setBuyer] = useState('');
-  const [customerId, setCustomerId] = useState('');
-  const [customers, setCustomers] = useState([]);
+  const [supplierId, setsupplierId] = useState('');
+  const [suppliers, setsuppliers] = useState([]);
+  // once suppliers loaded, map id to name if needed
+  useEffect(() => {
+    if (supplierId && suppliers.length) {
+      const cu = suppliers.find(c => c.supplier_id === supplierId);
+      if (cu) { setBuyer(cu.name); setAddress(cu.address || ''); setMobileNo(cu.mobile || ''); }
+    }
+  }, [suppliers, supplierId]);
   const [showCustDropdown, setShowCustDropdown] = useState(false);
   const [mobileNo, setMobileNo] = useState('');
   const [address, setAddress] = useState('');
   const [remark, setRemark] = useState('');
-  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
-  const [customInvoiceNo, setCustomInvoiceNo] = useState('');
+  const [status, setStatus] = useState('Received');
+  const [orderDate, setorderDate] = useState(new Date().toISOString().split('T')[0]);
+  const [customorderNo, setCustomorderNo] = useState('');
   const [formErrors, setFormErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [isSaved, setIsSaved] = useState(true); // Start with true to show Print by default
-  const [currentInvoiceId, setCurrentInvoiceId] = useState(invoiceNo || '');
+  const [currentorderId, setCurrentorderId] = useState(orderNo || '');
   const [editIndex, setEditIndex] = useState(-1);
 
   // Helper Functions
   const formatNumber = (value) => {
     return (parseFloat(value) || 0).toFixed(2);
+  };
+
+  // Utility to format product name and capitalize
+  const formatName = (name) => {
+    if (!name) return '';
+    return name
+      .replace(/-/g, ' ')
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  };
+
+  // Normalize packing type values to standard set
+  const mapPackingType = (rawType) => {
+    if (!rawType) return 'PCS';
+    const upper = rawType.toString().trim().toUpperCase();
+    if (['PC', 'PCS'].includes(upper)) return 'PCS';
+    if (['KG', 'KGS'].includes(upper)) return 'KGS';
+    if (['DZ', 'DOZ', 'DOZEN'].includes(upper)) return 'DOZEN';
+    if (['BOX', 'BOXES'].includes(upper)) return 'BOX';
+    if (['KODI'].includes(upper)) return 'KODI';
+    return upper;
   };
 
   const calculateGrandTotal = () => {
@@ -314,39 +327,39 @@ const Invoice = () => {
 
   // Sync local state when route param changes
   useEffect(() => {
-    setCurrentInvoiceId(invoiceNo || '');
-  }, [invoiceNo]);
+    setCurrentorderId(orderNo || '');
+  }, [orderNo]);
 
   // Fetch initial data
   useEffect(() => {
     const getNextId = async () => {
-      if (!invoiceNo) {
+      if (!orderNo) {
         try {
-          const res = await fetch('http://localhost:4000/api/invoices/next-id');
+          const res = await fetch('http://localhost:4000/api/supplier-orders/next-id');
           if (res.ok) {
             const data = await res.json();
-            setCustomInvoiceNo(data.next_id);
+            setCustomorderNo(data.next_id);
           }
         } catch (err) {
-          console.error('Error fetching next invoice id', err);
+          console.error('Error fetching next order id', err);
         }
       } else {
-        setCustomInvoiceNo(invoiceNo);
+        setCustomorderNo(orderNo);
       }
     };
     getNextId();
 
-    // Fetch customers & products
+    // Fetch suppliers & products
     const fetchInitialData = async () => {
       try {
-        const [customersRes, productsRes] = await Promise.all([
-          fetch('http://localhost:4000/api/customers'),
+        const [suppliersRes, productsRes] = await Promise.all([
+          fetch('http://localhost:4000/api/suppliers'),
           fetch('http://localhost:4000/api/products')
         ]);
 
-        if (customersRes.ok) {
-          const customersData = await customersRes.json();
-          setCustomers(customersData);
+        if (suppliersRes.ok) {
+          const suppliersData = await suppliersRes.json();
+          setsuppliers(suppliersData);
         }
 
         if (productsRes.ok) {
@@ -359,96 +372,58 @@ const Invoice = () => {
     };
 
     fetchInitialData();
-  }, [invoiceNo]);
+  }, [orderNo]);
 
-  // Load existing invoice if editing
+  // Load existing order if editing
   useEffect(() => {
-    if (invoiceNo) {
-      const fetchInvoice = async () => {
+    if (orderNo) {
+      const fetchorder = async () => {
         try {
-          const res = await fetch(`http://localhost:4000/api/invoices/${invoiceNo}`);
+          const res = await fetch(`http://localhost:4000/api/supplier-orders/${orderNo}`);
           if (res.ok) {
             const inv = await res.json();
-            //TODO Work on this
-            const formatName = (name) => {
-              if (!name) return '';
-              return name
-                .replace(/-/g, ' ') // replace hyphens with spaces
-                .split(' ')
-                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(' ');
-            };
-
             const processedItems = inv.items.map((item) => {
-              // Find matching product details (for packing type, size etc.)
               const prod = products.find((p) => p.code === item.product_code) || {};
-
-              // Build product name → Title-cased and include size
               const baseName = prod.name || item.product_name || item.product_code;
               const nameWithSpaces = formatName(baseName);
               const sizeText = prod.size || item.size ? ` ${prod.size || item.size}` : '';
               const productName = `${nameWithSpaces}${sizeText}`.trim();
-
-              // Quantity (numeric, 2 dp)
               const quantity = parseFloat(item.quantity).toFixed(2);
-
               return {
                 ...item,
                 productName,
                 code: item.product_code,
-                quantity,               // keep numeric text only
-                packingType: prod.packing_type || item.packing_type || '',
-                sellingPrice: parseFloat(item.selling_price).toFixed(2),
-                amount: (item.quantity * item.selling_price).toFixed(2),
+                quantity,
+                packingType: mapPackingType(prod.packing_type || item.packing_type || '')
               };
             });
 
-            setInvoiceItems(processedItems);
-            setCurrentInvoiceId(inv.invoice_id || invoiceNo);
-            setCustomerId(inv.customer_id);
+            setorderItems(processedItems);
+            setCurrentorderId(inv.order_id || orderNo);
+            setBuyer(inv.supplier_id);
+            setsupplierId(inv.supplier_id);
             setRemark(inv.remark || '');
-            setInvoiceDate(inv.invoice_date);
+            setorderDate(inv.order_date);
             setPacking(inv.packing || '');
             setFreight(inv.freight || '');
             setRiksha(inv.riksha || '');
-
-            // Try to fetch full customer details
-            let cust = customers.find(c => c.customer_id === inv.customer_id);
-            if (!cust) {
-              try {
-                const custRes = await fetch(`http://localhost:4000/api/customers/${inv.customer_id}`);
-                if (custRes.ok) {
-                  cust = await custRes.json();
-                }
-              } catch (err) {
-                console.error('Error fetching customer details:', err);
-              }
-            }
-
-            if (cust) {
-              setBuyer(cust.name);
-              setAddress(cust.address || '');
-              setMobileNo(cust.mobile || '');
-            } else {
-              setBuyer(inv.customer_id); // fallback
-            }
+            setStatus(inv.status || 'Received');
           }
-
         } catch (err) {
-          console.error('Error loading invoice:', err);
+          console.error('Error loading order:', err);
         }
       };
-      fetchInvoice();
+      fetchorder();
     }
-  }, [invoiceNo, products]);
+  }, [orderNo, products]);
 
   // Calculate total whenever items change
   useEffect(() => {
-    const sum = invoiceItems.reduce((acc, item) => {
+    const sum = orderItems.reduce((acc, item) => {
       return acc + (parseFloat(item.amount) || 0);
     }, 0);
     setTotal(sum);
-  }, [invoiceItems]);
+  }, [orderItems]);
 
   // Click outside handler for dropdowns
   useEffect(() => {
@@ -461,18 +436,18 @@ const Invoice = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Watch for changes in customerId to toggle editing state
+  // Watch for changes in supplierId to toggle editing state
   useEffect(() => {
-    if (customerId) {
+    if (supplierId) {
       setIsEditing(true);
       setIsSaved(false);
     }
-  }, [customerId]);
+  }, [supplierId]);
 
   // Watch for changes in any form inputs to toggle editing state
   useEffect(() => {
     const handleFormChange = () => {
-      if (isSaved && customerId) {
+      if (isSaved && supplierId) {
         setIsEditing(true);
         setIsSaved(false);
       }
@@ -488,14 +463,14 @@ const Invoice = () => {
         input.removeEventListener('change', handleFormChange);
       });
     };
-  }, [isSaved, customerId]);
+  }, [isSaved, supplierId]);
 
   // Handler Functions
   const validateForm = () => {
     const errors = {};
     if (!newItem.productName) errors.productName = 'Product is required';
     if (!newItem.quantity) errors.quantity = 'Quantity is required';
-    if (!newItem.sellingPrice) errors.sellingPrice = 'Price is required';
+
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -505,33 +480,33 @@ const Invoice = () => {
     if (!validateForm()) return;
 
     const quantity = parseFloat(newItem.quantity);
-    const sellingPrice = parseFloat(newItem.sellingPrice);
+    const sellingPrice = 0;
 
-    if (isNaN(quantity) || isNaN(sellingPrice) || quantity <= 0 || sellingPrice <= 0) {
-      toast.error('Please enter valid quantity and selling price');
+    if (isNaN(quantity) || quantity <= 0) {
+      toast.error('Please enter valid Quantity');
       return;
     }
 
     const amount = quantity * sellingPrice;
 
-    const newInvoiceItem = {
+    const neworderItem = {
       code: newItem.code,
       product_code: newItem.code,
       productName: newItem.productName,
-      quantity: quantity.toFixed(3),
+      quantity: quantity.toFixed(2),
       packingType: newItem.packingType,
-      sellingPrice: sellingPrice.toFixed(2),
-      amount: amount.toFixed(2)
+
+
     };
 
     if (editIndex > -1) {
-      const updated = [...invoiceItems];
-      updated[editIndex] = newInvoiceItem;
-      setInvoiceItems(updated);
+      const updated = [...orderItems];
+      updated[editIndex] = neworderItem;
+      setorderItems(updated);
       setEditIndex(-1);
       toast.success('Item updated successfully');
     } else {
-      setInvoiceItems([...invoiceItems, newInvoiceItem]);
+      setorderItems([...orderItems, neworderItem]);
       toast.success('Item added successfully');
     }
     setNewItem({
@@ -539,14 +514,14 @@ const Invoice = () => {
       productName: '',
       quantity: '',
       packingType: 'PCS',
-      sellingPrice: ''
+
     });
     setFormErrors({});
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleEditItem = (index) => {
-    const item = invoiceItems[index];
+    const item = orderItems[index];
     setNewItem({
       code: item.code,
       productName: item.productName,
@@ -559,80 +534,77 @@ const Invoice = () => {
   };
 
   const handleDeleteItem = (indexToDelete) => {
-    setInvoiceItems(invoiceItems.filter((_, index) => index !== indexToDelete));
-    // Mark form as dirty so that Save button appears
+    setorderItems(orderItems.filter((_, index) => index !== indexToDelete));
     setIsEditing(true);
     setIsSaved(false);
     toast.success('Item deleted successfully');
   };
 
-  const handleSelectCustomer = (cust) => {
+  const handleSelectsupplier = (cust) => {
     setBuyer(cust.name);
-    setCustomerId(cust.customer_id);
+    setsupplierId(cust.supplier_id);
     setAddress(cust.address);
     setMobileNo(cust.mobile);
     setShowCustDropdown(false);
   };
 
   const handleSave = async () => {
-    if (!customerId) {
-      toast.error('Please select a valid customer');
+    if (!supplierId) {
+      toast.error('Please select a valid supplier');
       return;
     }
-    if (invoiceItems.length === 0) {
+    if (orderItems.length === 0) {
       toast.error('Add at least one item');
       return;
     }
 
-    const { grandTotal } = calculateGrandTotal();
+    // No monetary fields needed for supplier orders
+
     const payload = {
-      customer_id: customerId,
-      invoice_date: invoiceDate,
+      supplier_id: supplierId,
+      order_date: orderDate,
       remark,
-      packing: parseFloat(packing || 0),
-      freight: parseFloat(freight || 0),
-      riksha: parseFloat(riksha || 0),
-      grand_total: grandTotal,
-      items: invoiceItems.map(i => ({
+      status,
+      items: orderItems.map(i => ({
         product_code: i.code || i.product_code,
-        quantity: parseFloat(i.quantity),
-        selling_price: parseFloat(i.sellingPrice)
+        quantity: parseFloat(i.quantity)
       }))
     };
 
     try {
-      const url = currentInvoiceId
-        ? `http://localhost:4000/api/invoices/${currentInvoiceId}`
-        : 'http://localhost:4000/api/invoices';
+      const url = currentorderId
+        ? `http://localhost:4000/api/supplier-orders/${currentorderId}`
+        : 'http://localhost:4000/api/supplier-orders';
 
       const res = await fetch(url, {
-        method: currentInvoiceId ? 'PUT' : 'POST',
+        method: currentorderId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error('Failed to save invoice');
+      if (!res.ok) throw new Error('Failed to save order');
 
       const data = await res.json();
-      toast.success(`Invoice saved successfully (ID: ${data.invoice_id || currentInvoiceId})`);
+      toast.success(`Order saved successfully (ID: ${data.order_id || currentorderId})`);
       // if it was a create request, persist the returned id for future updates
-      if (!currentInvoiceId && data.invoice_id) {
-        setCurrentInvoiceId(data.invoice_id);
-        setCustomInvoiceNo(data.invoice_id);
+      if (!currentorderId && data.order_id) {
+        setCurrentorderId(data.order_id);
+        setCustomorderNo(data.order_id);
       }
       setIsSaved(true);
       setIsEditing(false);
     } catch (err) {
-      console.error('Error saving invoice:', err);
-      toast.error('Error saving invoice');
+      console.error('Error saving order:', err);
+      toast.error('Error saving order');
     }
   };
 
   const handlePrint = () => {
     const originalTitle = document.title;
-    if (customerId && customInvoiceNo) {
-      document.title = `${customerId} ${customInvoiceNo}`;
+    if (supplierId && customorderNo) {
+      document.title = `${supplierId} ${customorderNo}`;
     }
+    // just trigger browser print; @media print styles handle visibility
     window.print();
     document.title = originalTitle;
   };
@@ -647,23 +619,23 @@ const Invoice = () => {
         {/* Header Section */}
         <div className="p-3 sm:p-6 border-b print:p-4">
           <div className="text-center mb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#05014A]">ESTIMATE</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#05014A]">Supplier Order</h1>
           </div>
-          {/* Invoice Details and Customer Section */}
+          {/* order Details and supplier Section */}
           <div className="flex flex-col sm:flex-row justify-between mb-4">
             <div className="mb-2 sm:mb-0">
               <p className="font-semibold">
-                <span className="text-gray-600">Invoice No.: </span>
-                {customInvoiceNo || '...'}
+                <span className="text-gray-600">Order No.: </span>
+                {customorderNo || '...'}
               </p>
             </div>
             <div>
               <p className="font-semibold">
-                <span className="text-gray-600">Invoice Date: </span>
+                <span className="text-gray-600">Order Date: </span>
                 <input
                   type="date"
-                  value={invoiceDate}
-                  onChange={(e) => setInvoiceDate(e.target.value)}
+                  value={orderDate}
+                  onChange={(e) => setorderDate(e.target.value)}
                   className="border rounded px-2 py-1 print:border-none print:bg-transparent"
                 />
               </p>
@@ -672,9 +644,9 @@ const Invoice = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
             <div className="space-y-2">
-              {/* Customer Selection */}
+              {/* supplier Selection */}
               <div className="flex items-center relative" ref={wrapperRef}>
-                <label className="inline-block w-28 text-sm font-medium text-gray-700 mr-2">Customer:</label>
+                <label className="inline-block w-28 text-sm font-medium text-gray-700 mr-2">supplier:</label>
                 <div className="flex-1 relative">
                   <input
                     type="text"
@@ -684,33 +656,33 @@ const Invoice = () => {
                       const name = e.target.value;
                       setBuyer(name);
                       setShowCustDropdown(true);
-                      const cust = customers.find(c => c.name.toLowerCase() === name.toLowerCase());
+                      const cust = suppliers.find(c => c.name.toLowerCase() === name.toLowerCase());
                       if (cust) {
-                        setCustomerId(cust.customer_id);
+                        setsupplierId(cust.supplier_id);
                         setAddress(cust.address);
                         setMobileNo(cust.mobile);
                       } else {
-                        setCustomerId('');
+                        setsupplierId('');
                       }
                     }}
                     className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                    placeholder="Search customer..."
+                    placeholder="Search supplier..."
                   />
                   {showCustDropdown && (
                     <ul className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
-                      {customers
+                      {suppliers
                         .filter((c) => c.name.toLowerCase().includes(buyer.toLowerCase()))
                         .map((c) => (
                           <li
-                            key={c.customer_id}
+                            key={c.supplier_id}
                             className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
-                            onClick={() => handleSelectCustomer(c)}
+                            onClick={() => handleSelectsupplier(c)}
                           >
                             {c.name}
                           </li>
                         ))}
-                      {customers.filter((c) => c.name.toLowerCase().includes(buyer.toLowerCase())).length === 0 && (
-                        <li className="px-4 py-2 text-gray-500 text-sm">No customers found</li>
+                      {suppliers.filter((c) => c.name.toLowerCase().includes(buyer.toLowerCase())).length === 0 && (
+                        <li className="px-4 py-2 text-gray-500 text-sm">No suppliers found</li>
                       )}
                     </ul>
                   )}
@@ -731,13 +703,30 @@ const Invoice = () => {
             </div>
 
             <div className="space-y-2">
+              {/* Status */}
+              <div className="flex items-center">
+                <label className="inline-block w-28 text-sm font-medium text-gray-700 mr-2">Status:</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white print:border-none print:bg-transparent print:p-0 print:m-0 print:outline-none print:appearance-none"
+                >
+                  <option>Received</option>
+                  <option>In Progress</option>
+                  <option>Waiting for Payment</option>
+                  <option>Completed</option>
+                  <option>Shipped</option>
+                  <option>Delivered</option>
+                </select>
+              </div>
+
               {/* Address */}
               <div className="flex items-start">
                 <label className="inline-block w-28 text-sm font-medium text-gray-700 mr-2 mt-2">Address:</label>
                 <textarea
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
+                  className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none print:border-none print:bg-transparent print:p-0 print:m-0 print:overflow-visible"
                   placeholder="Enter address"
                   rows="2"
                 ></textarea>
@@ -779,25 +768,26 @@ const Invoice = () => {
                   <th className="border p-3 text-left text-sm font-semibold text-gray-700">S.No.</th>
                   <th className="border p-3 text-left text-sm font-semibold text-gray-700">Item Name</th>
                   <th className="border p-3 text-center text-sm font-semibold text-gray-700">Qty</th>
-                  <th className="border p-3 text-center text-sm font-semibold text-gray-700">Rate</th>
-                  <th className="border p-3 text-center text-sm font-semibold text-gray-700">Amount</th>
+
+
                   <th className="border p-3 text-center text-sm font-semibold text-gray-700 print:hidden">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {invoiceItems.map((item, index) => (
+                {orderItems.map((item, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="border p-3 text-sm text-gray-600">{index + 1}</td>
                     <td className="border p-3 text-sm text-gray-800 font-medium">{item.productName}</td>
                     <td className="border p-3 text-sm text-gray-600 text-center">
                       {item.quantity} {item.packingType}
                     </td>
-                    <td className="border p-3 text-sm text-gray-600 text-center">
-                      ₹{formatNumber(item.sellingPrice)}
-                    </td>
-                    <td className="border p-3 text-sm text-gray-800 font-medium text-center">
-                      ₹{formatNumber(item.amount)}
-                    </td>
+                    {isEditing ? (
+                      <>
+
+                      </>
+                    ) : (
+                      <></>
+                    )}
                     <td className="border p-3 text-center print:hidden">
                       <div className="flex items-center justify-center space-x-3">
                         <button
@@ -826,67 +816,15 @@ const Invoice = () => {
         {/* Summary Section */}
         <div className="px-6 pb-6">
           <div className="max-w-md ml-auto">
-            <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-              <h3 className="font-semibold text-lg text-gray-800 mb-4">Invoice Summary</h3>
-
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal:</span>
-                  <span className="font-medium">₹{formatNumber(total)}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Packing:</span>
-                  <input
-                    type="number"
-                    value={packing}
-                    onChange={(e) => setPacking(e.target.value)}
-                    className="w-24 text-right border-b border-gray-300 focus:outline-none focus:border-blue-500"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Freight:</span>
-                  <input
-                    type="number"
-                    value={freight}
-                    onChange={(e) => setFreight(e.target.value)}
-                    className="w-24 text-right border-b border-gray-300 focus:outline-none focus:border-blue-500"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Riksha:</span>
-                  <input
-                    type="number"
-                    value={riksha}
-                    onChange={(e) => setRiksha(e.target.value)}
-                    className="w-24 text-right border-b border-gray-300 focus:outline-none focus:border-blue-500"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div className="flex justify-between pt-3 border-t border-gray-200">
-                  <span className="text-gray-600">Round Off:</span>
-                  <span>₹{roundOff.toFixed(2)}</span>
-                </div>
-
-                <div className="flex justify-between pt-3 border-t border-gray-300 font-bold text-lg">
-                  <span>Grand Total:</span>
-                  <span className="text-[#05014A]">₹{grandTotal.toFixed(2)}</span>
-                </div>
-              </div>
-
+            <div className="bg-gray-50 rounded-xl p-5 border border-gray-200 print:border-none print:bg-transparent print:p-0 print:m-0 print:outline-none print:appearance-none">
               <div className="print:hidden">
-                {(isEditing && !isSaved && customerId) ? (
+                {(isEditing && !isSaved && supplierId) ? (
                   <button
                     onClick={handleSave}
                     className="cursor-pointer mt-6 w-full bg-[#05014A] hover:bg-[#0A0A47] text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors"
                   >
                     <Save className="mr-2" size={20} />
-                    Save Invoice
+                    Save order
                   </button>
                 ) : (
                   <button
@@ -894,7 +832,7 @@ const Invoice = () => {
                     className="cursor-pointer mt-6 w-full bg-[#05014A] hover:bg-[#0A0A47] text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors"
                   >
                     <Printer className="mr-2" size={20} />
-                    Print Invoice
+                    Print Order
                   </button>
                 )}
               </div>
@@ -906,4 +844,4 @@ const Invoice = () => {
   );
 };
 
-export default Invoice;
+export default order;

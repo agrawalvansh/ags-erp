@@ -1,26 +1,44 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaUser, FaLock, FaGoogle, FaGithub } from 'react-icons/fa';
+import { FaUser, FaLock } from 'react-icons/fa'; // icons
 import { FiArrowRight } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
+import { toast } from 'react-hot-toast';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, login } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
+  const [error, setError] = useState('');
+  const ENV_USERNAME = import.meta.env.VITE_loginId;
+  const ENV_PASSWORD = import.meta.env.VITE_Password;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Redirect to home page on form submission
-    navigate("/invoice");
+    if (
+      formData.username === ENV_USERNAME &&
+      formData.password === ENV_PASSWORD
+    ) {
+      setError('');
+      login();
+      toast.success('Login Successful');
+      navigate('/invoice');
+    } else {
+      setError('Wrong username or password');
+    }
   };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  if (isAuthenticated) {
+    return <Navigate to="/invoice" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-[#caf0f8] flex items-center justify-center p-4">
@@ -56,9 +74,9 @@ const LoginPage = () => {
             {/* Feature list with improved accessibility */}
             <div className="flex flex-col gap-6 text-left">
               {[
-                "Secure business networking",
-                "Real-time collaboration tools",
-                "Enterprise-grade encryption"
+                "Create Invoices",
+                "Manage Price Lists",
+                "Track Accounts"
               ].map((feature, index) => (
                 <motion.div
                   key={feature}
@@ -87,8 +105,8 @@ const LoginPage = () => {
             className="space-y-8"
           >
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-[#05014A]">Welcome Back</h2>
-              <p className="mt-2 text-[#05014A]/80">Sign in to continue your business journey</p>
+              <h2 className="text-3xl font-bold text-[#05014A]">Welcome Back Amit</h2>
+              <p className="mt-2 text-[#05014A]/80">Login to continue your business journey</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -104,6 +122,9 @@ const LoginPage = () => {
                     onChange={handleChange}
                     className="w-full pl-12 pr-4 py-3 rounded-lg border border-[#05014A]/20 focus:border-[#05014A]/50 focus:ring-2 focus:ring-[#05014A]/10 bg-white/50 transition-all placeholder:text-[#05014A]/40"
                     placeholder="Enter your username"
+                    required
+                    id="username"
+                    autoComplete="off"
                   />
                 </div>
               </div>
@@ -120,60 +141,27 @@ const LoginPage = () => {
                     onChange={handleChange}
                     className="w-full pl-12 pr-4 py-3 rounded-lg border border-[#05014A]/20 focus:border-[#05014A]/50 focus:ring-2 focus:ring-[#05014A]/10 bg-white/50 transition-all placeholder:text-[#05014A]/40"
                     placeholder="Enter your password"
-                  />
+                    required
+                    id="password"
+                    autoComplete="off"
+                    />
                 </div>
               </div>
 
+              {error && (
+                <p className="text-red-600 text-sm text-center">{error}</p>
+              )}
               {/* Submit Button with loading state */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="w-full bg-[#05014A] hover:bg-[#05014A]/90 text-[#caf0f8] py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                className="w-full bg-[#05014A] hover:bg-[#05014A]/90 text-[#caf0f8] py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
-                <span>Sign In</span>
+                <span>Login</span>
                 <FiArrowRight className="w-5 h-5" />
               </motion.button>
             </form>
-
-            {/* Helper Links */}
-            <div className="text-center space-y-2 flex flex-col items-center justify-between">
-              <a href="#" className="text-sm text-[#05014A]/80 hover:text-[#05014A] underline underline-offset-4 transition-colors">
-                Forgot password?
-              </a>
-              <div className="text-sm text-[#05014A]/80">
-                If not register with us <Link to="/signup" className="text-[#05014A] font-medium hover:underline">Signup</Link>
-              </div>
-            </div>
-
-            {/* Social Auth with better contrast */}
-            <div className="space-y-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[#05014A]/10" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-[#05014A]/60">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="flex gap-4 justify-center">
-                <motion.button
-                  whileHover={{ y: -2 }}
-                  className="p-3 rounded-lg border border-[#05014A]/10 hover:border-[#05014A]/30 bg-white/50 flex items-center gap-2 text-[#05014A]/80 hover:text-[#05014A] transition-colors"
-                >
-                  <FaGoogle className="w-5 h-5" />
-                  <span className="text-sm">Google</span>
-                </motion.button>
-                <motion.button
-                  whileHover={{ y: -2 }}
-                  className="p-3 rounded-lg border border-[#05014A]/10 hover:border-[#05014A]/30 bg-white/50 flex items-center gap-2 text-[#05014A]/80 hover:text-[#05014A] transition-colors"
-                >
-                  <FaGithub className="w-5 h-5" />
-                  <span className="text-sm">GitHub</span>
-                </motion.button>
-              </div>
-            </div>
           </motion.div>
         </div>
       </motion.div>

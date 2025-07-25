@@ -1,18 +1,43 @@
-//Check the sorting functionality
 import { useNavigate } from 'react-router-dom';
-import React, { useState, useMemo } from 'react';
-import { ChevronDown, Plus, Search } from 'lucide-react';
-import Data from '../data/Data';
-const Inventory = () => {
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronDown, Plus, Search, Eye, EyeOff, Edit } from 'lucide-react';
+
+const PriceList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [products, setProducts] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [showCostPrice, setShowCostPrice] = useState(false);
+
+  // Load products from backend on first render
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/api/products');
+        const data = await res.json();
+        // Normalize keys to match existing table code expectations
+        const normalized = data.map(p => ({
+          id: p.code,
+          productName: p.name,
+          code: p.code,
+          size: p.size,
+          costPrice: p.cost_price,
+          packingType: p.packing_type,
+          sellingPrice: p.selling_price,
+        }));
+        setProducts(normalized);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   // Apply sorting, searching and pagination
   const processedData = useMemo(() => {
-    let filtered = Data.filter(item => 
+    let filtered = products.filter(item => 
       item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -33,7 +58,7 @@ const Inventory = () => {
     // Pagination
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filtered.slice(startIndex, startIndex + itemsPerPage);
-  }, [Data, searchTerm, sortConfig, currentPage]);
+  }, [products, searchTerm, sortConfig, currentPage]);
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -44,7 +69,7 @@ const Inventory = () => {
   };
 
   const totalPages = Math.ceil(
-    Data.filter(item => 
+    products.filter(item => 
       item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.code.toLowerCase().includes(searchTerm.toLowerCase())
     ).length / itemsPerPage
@@ -64,7 +89,7 @@ const Inventory = () => {
       {/* Header */}
       <header className="bg-[#caf0f8] p-4 md:p-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#05014A]">Inventory Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#05014A]">Price List</h1>
           
           <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
             <div className="relative w-full">
@@ -80,54 +105,77 @@ const Inventory = () => {
                 }}
               />
             </div>
+
+            <button 
+              className="flex items-center justify-center bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#05014A] whitespace-nowrap cursor-pointer"
+              onClick={() => setShowCostPrice(prev => !prev)}
+            >
+              {showCostPrice ? <EyeOff className="mr-2" size={20} /> : <Eye className="mr-2" size={20} />}
+              {showCostPrice ? 'Hide' : 'Show'} Cost Price
+            </button>
             
             <button 
               className="flex items-center justify-center bg-[#05014A] text-white px-4 py-2 rounded-lg hover:bg-[#03012e] transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#05014A] whitespace-nowrap cursor-pointer"
-              onClick={() => navigate('/inventory/add')}
+              onClick={() => navigate('/price-list/add')}
             >
               <Plus className="mr-2" size={20} />
               Add New Product
             </button>
+
           </div>
         </div>
       </header>
 
-      {/* Inventory Table */}
+      {/* Price List Table */}
       <main className="flex-1 p-4 md:p-6">
         <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-center">
               <thead className="bg-[#05014A] text-white">
                 <tr>
-                  <th className="p-3 text-left">No.</th>
+                  <th className="p-3 text-center">No.</th>
                   <th 
-                    className="p-3 text-left cursor-pointer hover:bg-[#03012e] transition-colors"
+                    className="p-3 text-center cursor-pointer hover:bg-[#03012e] transition-colors"
                     onClick={() => handleSort('productName')}
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-center justify-center">
                       Product Name
                       <ChevronDown className={`ml-1 transition-transform ${sortConfig.key === 'productName' && sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} size={16} />
                     </div>
                   </th>
-                  <th className="p-3 text-left">Code</th>
+                  <th className="p-3 text-center">Code</th>
+                  <th className="p-3 text-center">Size</th>
+                  {showCostPrice && (
+                    <th 
+                      className="p-3 text-center cursor-pointer hover:bg-[#03012e] transition-colors"
+                      onClick={() => handleSort('costPrice')}
+                    >
+                      <div className="flex items-center justify-center">
+                        Cost Price
+                        <ChevronDown className={`ml-1 transition-transform ${sortConfig.key === 'costPrice' && sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} size={16} />
+                      </div>
+                    </th>
+                  )}
+                  
                   <th 
-                    className="p-3 text-left cursor-pointer hover:bg-[#03012e] transition-colors"
-                    onClick={() => handleSort('stock')}
-                  >
-                    <div className="flex items-center">
-                      Stock
-                      <ChevronDown className={`ml-1 transition-transform ${sortConfig.key === 'stock' && sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} size={16} />
-                    </div>
-                  </th>
-                  <th 
-                    className="p-3 text-left cursor-pointer hover:bg-[#03012e] transition-colors"
+                    className="p-3 text-center cursor-pointer hover:bg-[#03012e] transition-colors"
                     onClick={() => handleSort('sellingPrice')}
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-center justify-center">
                       Price
                       <ChevronDown className={`ml-1 transition-transform ${sortConfig.key === 'sellingPrice' && sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} size={16} />
                     </div>
                   </th>
+                  <th 
+                    className="p-3 text-center cursor-pointer hover:bg-[#03012e] transition-colors"
+                    onClick={() => handleSort('packingType')}
+                  >
+                    <div className="flex items-center justify-center">
+                      Packing Type
+                      <ChevronDown className={`ml-1 transition-transform ${sortConfig.key === 'packingType' && sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} size={16} />
+                    </div>
+                  </th>
+                  <th className="p-3 text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -137,24 +185,28 @@ const Inventory = () => {
                       key={item.id} 
                       className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="p-3">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                      <td className="p-3 font-medium text-gray-900">{item.productName}</td>
-                      <td className="p-3 text-gray-600">{item.code}</td>
-                      <td className="p-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          item.stock < item.required 
-                            ? 'bg-red-100 text-red-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
-                          {item.stock} {item.packingType}
-                        </span>
+                      <td className="p-3 text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                      <td className="p-3 text-center font-medium text-gray-900">{item.productName}</td>
+                      <td className="p-3 text-center text-gray-600">{item.code}</td>
+                      <td className="p-3 text-center text-gray-600">{item.size}</td>
+                      {showCostPrice && (
+                        <td className="p-3 text-center">{formatCurrency(item.costPrice)}</td>
+                      )}
+                      <td className="p-3 text-center font-semibold">{formatCurrency(item.sellingPrice)}</td>
+                      <td className="p-3 text-center">{item.packingType}</td>
+                      <td className="p-3 text-center">
+                        <button
+                          onClick={() => navigate(`/price-list/edit/${item.code}`)}
+                          className="text-blue-600 hover:underline cursor-pointer"
+                        >
+                          <Edit size={18} />
+                        </button>
                       </td>
-                      <td className="p-3 font-semibold">{formatCurrency(item.sellingPrice)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="p-6 text-center text-gray-500">
+                    <td colSpan={showCostPrice ? 8 : 7} className="p-6 text-center text-gray-500">
                       No products found. Try a different search term.
                     </td>
                   </tr>
@@ -171,7 +223,7 @@ const Inventory = () => {
                 <span className="font-medium">
                   {Math.min(currentPage * itemsPerPage, processedData.length + (currentPage - 1) * itemsPerPage)}
                 </span>{' '}
-                of <span className="font-medium">{Data.length}</span> results
+                of <span className="font-medium">{products.length}</span> results
               </div>
               <div className="flex space-x-2">
                 <button
@@ -205,4 +257,4 @@ const Inventory = () => {
   );
 };
 
-export default Inventory;
+export default PriceList;

@@ -13,7 +13,7 @@ export const parseDate = (dateStr) => {
   return new Date(yyyy, mm - 1, dd);
 };
 
-const BuyerAccountDetail = () => {
+const SupplierAccountDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [fromDate, setFromDate] = useState('');
@@ -26,7 +26,7 @@ const BuyerAccountDetail = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // State management
-  const [buyer, setBuyer] = useState({});
+  const [supplier, setSupplier] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [invoices, setInvoices] = useState([]);
@@ -40,7 +40,7 @@ const BuyerAccountDetail = () => {
   // Fetch functions remain the same
   const fetchInvoices = useCallback(async () => {
     try {
-      const resInv = await fetch(`http://localhost:4000/api/customers/${slug}/invoices`);
+      const resInv = await fetch(`http://localhost:4000/api/suppliers/${slug}/maal`);
       if (resInv.ok) {
         setInvoices(await resInv.json());
       }
@@ -51,7 +51,7 @@ const BuyerAccountDetail = () => {
 
   const fetchTransactions = useCallback(async () => {
     try {
-      const resTx = await fetch(`http://localhost:4000/api/customers/${slug}/transactions`);
+      const resTx = await fetch(`http://localhost:4000/api/suppliers/${slug}/transactions`);
       if (resTx.ok) {
         setTransactions(await resTx.json());
       }
@@ -61,27 +61,27 @@ const BuyerAccountDetail = () => {
   }, [slug]);
 
   useEffect(() => {
-    const fetchBuyer = async () => {
+    const fetchSupplier = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch('http://localhost:4000/api/customers');
-        if (!res.ok) throw new Error('Failed to fetch customers');
-        const customers = await res.json();
-        const found = customers.find(c => c.customer_id === slug);
+        const res = await fetch('http://localhost:4000/api/suppliers');
+        if (!res.ok) throw new Error('Failed to fetch suppliers');
+        const suppliers = await res.json();
+        const found = suppliers.find(c => c.supplier_id === slug);
         
         if (!found) {
-          setError('Customer not found');
+          setError('Supplier not found');
         } else {
-          setBuyer(found);
+          setSupplier(found);
         }
       } catch (err) {
-        setError('Error loading customer data');
-        console.error('Error fetching customer:', err);
+        setError('Error loading supplier data');
+        console.error('Error fetching supplier:', err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchBuyer();
+    fetchSupplier();
     fetchInvoices();
     fetchTransactions();
   }, [slug, fetchInvoices, fetchTransactions]);
@@ -90,11 +90,11 @@ const BuyerAccountDetail = () => {
   const accountData = useMemo(() => {
     const maalEntries = invoices.map((inv) => ({
       type: 'maal',
-      id: `M-${inv.invoice_id}`,
-      maalDate: inv.invoice_date,
-      maalInvoiceNumber: inv.invoice_id,
-      maalAmount: inv.grand_total,
-      maalRemark: inv.remark || '',
+      id: `M-${inv.id ?? inv.invoice_id}`,
+      maalDate: inv.invoice_date ?? inv.maal_date,
+      maalInvoiceNumber: inv.invoice_id ?? inv.maal_invoice_no,
+      maalAmount: inv.grand_total ?? inv.maal_amount,
+      maalRemark: inv.remark ?? inv.maal_remark ?? '',
     }));
 
     const jamaEntries = transactions.map((t) => {
@@ -180,21 +180,14 @@ const BuyerAccountDetail = () => {
       return dateStr;
     };
   
-    // Navigation helper for invoice links
-    const handleInvoiceNavigate = (invoiceId) => {
-      if (invoiceId && invoiceId.startsWith('AGS-I-')) {
-        navigate(`/invoice/${invoiceId}`);
-      }
-    };
-
     // Row editing functions
     // Navigate to dedicated edit entry page instead of inline editing
     const handleEditClick = (row) => {
       const entryType = row.type;
       const entryId = entryType === 'maal'
-        ? row.maalInvoiceNumber
+        ? (row.id && row.id.startsWith('M-') ? row.id.slice(2) : row.id)
         : (row.transactionId ?? (row.id ? row.id.split('-')[1] : ''));
-      navigate(`/accounts/customers/${slug}/edit/${entryType}/${entryId}`);
+      navigate(`/accounts/suppliers/${slug}/edit/${entryType}/${entryId}`);
     };
   
     const handleSaveEdit = async (rowId) => {
@@ -202,27 +195,22 @@ const BuyerAccountDetail = () => {
         if (!editDraft.type) return setEditingRow(null);
         
         if (editDraft.type === 'maal') {
-          // Use original invoice no from rowId (e.g. "M-AGS-I-1") instead of possibly edited draft
-          const originalInvoiceNo = rowId.startsWith('M-') ? rowId.slice(2) : rowId;
-          await fetch(`http://localhost:4000/api/maal/${originalInvoiceNo}`, {
+          // Extract numeric maal row id (e.g. "M-12" -> 12)
+          const numericId = rowId.startsWith('M-') ? rowId.slice(2) : rowId;
+          await fetch(`http://localhost:4000/api/supplier-maal/${numericId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              invoice_number: editDraft.maalInvoiceNumber, // new or unchanged
+              invoice_number: editDraft.maalInvoiceNumber,
               date: editDraft.maalDate,
               amount: editDraft.maalAmount,
               remark: editDraft.maalRemark,
             }),
           });
-          setInvoices((prev) => prev.map(inv => 
-            inv.invoice_id === editDraft.maalInvoiceNumber 
-              ? {...inv, grand_total: editDraft.maalAmount, invoice_date: editDraft.maalDate}
-              : inv
-          ));
         } else if (editDraft.type === 'jama') {
           const txnId = editDraft.transactionId ?? editDraft.transaction_id ?? (editDraft.id ? editDraft.id.split('-')[1] : null);
           if (txnId) {
-            await fetch(`http://localhost:4000/api/transactions/${txnId}`, {
+            await fetch(`http://localhost:4000/api/supplier-transactions/${txnId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -255,39 +243,39 @@ const BuyerAccountDetail = () => {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
             <div>
-              <h1 className="text-3xl font-bold">{buyer.name}</h1>
+              <h1 className="text-3xl font-bold">{supplier.name}</h1>
               <div className="mt-2 space-y-1">
-                {buyer.address && (
+                {supplier.address && (
                   <div className="flex items-center text-gray-200">
                     <MapPin size={16} className="mr-2" />
-                    <span>{buyer.address}</span>
+                    <span>{supplier.address}</span>
                   </div>
                 )}
-                {buyer.mobile && (
+                {supplier.mobile && (
                   <div className="flex items-center text-gray-200">
                     <Phone size={16} className="mr-2" />
-                    <span>{buyer.mobile}</span>
+                    <span>{supplier.mobile}</span>
                   </div>
                 )}
-                {buyer.gstNumber && (
+                {supplier.gstNumber && (
                   <div className="flex items-center text-gray-200">
                     <Building size={16} className="mr-2" />
-                    <span>GST: {buyer.gstNumber}</span>
+                    <span>GST: {supplier.gstNumber}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 cursor-pointer">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={() => navigate(`/accounts/customers/${slug}/add/maal`)}
+                onClick={() => navigate(`/accounts/suppliers/${slug}/add/maal`)}
                 className="flex items-center justify-center bg-white text-[#05014A] px-4 py-2 rounded-lg hover:bg-opacity-90 transition shadow-sm cursor-pointer"
               >
                 <Plus size={18} className="mr-2" />
                 Add Maal Entry
               </button>
               <button
-                onClick={() => navigate(`/accounts/customers/${slug}/add/jama`)}
+                onClick={() => navigate(`/accounts/suppliers/${slug}/add/jama`)}
                 className="flex items-center justify-center bg-[#0077b6] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition shadow-sm cursor-pointer"
               >
                 <Plus size={18} className="mr-2" />
@@ -313,10 +301,10 @@ const BuyerAccountDetail = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setIsFiltering(!isFiltering)}
-                className={`cursor-pointer flex items-center px-4 py-2 rounded-lg transition ${
+                className={`flex items-center px-4 py-2 rounded-lg transition ${
                   isFiltering 
                     ? 'bg-[#05014A] text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer'
                 }`}
               >
                 <Filter size={18} className="mr-2" />
@@ -369,7 +357,7 @@ const BuyerAccountDetail = () => {
 
               <div className="mt-4 flex justify-end">
                 <button
-                  className="cursor-pointer px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition cursor-pointer"
                   onClick={() => {
                     setFromDate('');
                     setToDate('');
@@ -417,7 +405,7 @@ const BuyerAccountDetail = () => {
                           formatDate(row.maalDate)
                         )}
                       </td>
-                      <td className="px-4 py-3 cursor-pointer">
+                      <td className="px-4 py-3">
                         {editingRow === row.id ? (
                           <input
                             type="text"
@@ -426,12 +414,7 @@ const BuyerAccountDetail = () => {
                             onChange={(e) => setEditDraft({ ...editDraft, maalInvoiceNumber: e.target.value })}
                           />
                         ) : (
-                          <span
-                            className={`$${row.maalInvoiceNumber && row.maalInvoiceNumber.startsWith('AGS-I-') ? 'cursor-pointer text-blue-600 hover:underline' : ''}`}
-                            onClick={() => handleInvoiceNavigate(row.maalInvoiceNumber)}
-                          >
-                            {row.maalInvoiceNumber}
-                          </span>
+                          row.maalInvoiceNumber
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -608,4 +591,4 @@ const BuyerAccountDetail = () => {
   );
 };
 
-export default BuyerAccountDetail;
+export default SupplierAccountDetail;

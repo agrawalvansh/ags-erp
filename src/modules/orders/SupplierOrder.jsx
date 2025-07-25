@@ -1,39 +1,51 @@
-import React, { useState, useMemo } from 'react';
-import { Search, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, ChevronDown, Plus } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-import OrderData from '../data/OrderData';
-import UserData from '../data/UserData';
+// Remove mock data; will fetch from API
 
-const OrdersRecived = () => {
+const supplierOrder = () => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [orders, setOrders] = useState([]);
+
+  // fetch orders on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('http://localhost:4000/api/supplier-orders');
+        if (res.ok) {
+          const data = await res.json();
+          setOrders(data);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to fetch orders');
+      }
+    })();
+  }, []);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Map slug -> user for quick lookup
-  const userMap = useMemo(
-    () => UserData.reduce((acc, u) => {
-      acc[u.slug] = u;
-      return acc;
-    }, {}),
-    []
-  );
+
 
   const processedOrders = useMemo(() => {
-    // Merge name
-    let merged = OrderData.map((o) => ({
+    let merged = orders.map(o => ({
       ...o,
-      name: userMap[o.slug]?.name || o.slug,
+      name: o.supplier_name || o.name || o.supplier_id,
+      status: o.status || 'Received',
+      orderNo: o.order_id || o.orderNo,
+      date: o.order_date || o.date,
     }));
 
     // Search filter
     let filtered = merged.filter(
       (o) =>
-        o.orderNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        o.name.toLowerCase().includes(searchTerm.toLowerCase())
+        (o.orderNo || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (o.name || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Sorting
@@ -48,13 +60,13 @@ const OrdersRecived = () => {
     // Pagination slice
     const start = (currentPage - 1) * itemsPerPage;
     return filtered.slice(start, start + itemsPerPage);
-  }, [searchTerm, sortConfig, currentPage]);
+  }, [searchTerm, sortConfig, currentPage, orders]);
 
   const totalPages = Math.ceil(
-    OrderData.filter(
+    orders.filter(
       (o) =>
-        o.orderNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (userMap[o.slug]?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (o.orderNo || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (o.name || '').toLowerCase().includes(searchTerm.toLowerCase())
     ).length / itemsPerPage
   );
 
@@ -64,15 +76,8 @@ const OrdersRecived = () => {
     setSortConfig({ key, direction });
   };
 
-  const formatCurrency = (val) =>
-    new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(val);
-
   const handleRowClick = (orderNo) => {
-    navigate(`/orders/received/${orderNo}`);
+    navigate(`/orders/suppliers/${orderNo}`);
   };
 
   return (
@@ -80,23 +85,31 @@ const OrdersRecived = () => {
       {/* Header */}
       <header className="bg-[#caf0f8] p-4 md:p-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#05014A]">Orders Received</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#05014A]">Orders Sent</h1>
+          
+          <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input 
+                type="text" 
+                placeholder="Search products or codes..."
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#05014A] focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
 
-          <div className="relative w-full md:w-80">
-            <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Search order or customer..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#05014A] focus:border-transparent"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-            />
+            <button 
+              className="flex items-center justify-center bg-[#05014A] text-white px-4 py-2 rounded-lg hover:bg-[#03012e] transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#05014A] whitespace-nowrap cursor-pointer"
+              onClick={() => navigate('/orders/suppliers/add')}
+            >
+              <Plus className="mr-2" size={20} />
+              Add New Order
+            </button>
+
           </div>
         </div>
       </header>
@@ -153,13 +166,13 @@ const OrdersRecived = () => {
                   </th>
                   <th
                     className="p-3 text-left cursor-pointer hover:bg-[#03012e] transition-colors"
-                    onClick={() => handleSort('totalAmount')}
+                    onClick={() => handleSort('status')}
                   >
                     <div className="flex items-center">
-                      Amount
+                      Status
                       <ChevronDown
                         className={`ml-1 transition-transform ${
-                          sortConfig.key === 'totalAmount' && sortConfig.direction === 'desc' ? 'rotate-180' : ''
+                          sortConfig.key === 'status' && sortConfig.direction === 'desc' ? 'rotate-180' : ''
                         }`}
                         size={16}
                       />
@@ -179,7 +192,7 @@ const OrdersRecived = () => {
                       <td className="p-3 font-medium text-gray-900">{order.orderNo}</td>
                       <td className="p-3">{order.name}</td>
                       <td className="p-3">{order.date}</td>
-                      <td className="p-3 font-semibold">{formatCurrency(order.totalAmount)}</td>
+                      <td className="p-3">{order.status}</td>
                     </tr>
                   ))
                 ) : (
@@ -204,7 +217,7 @@ const OrdersRecived = () => {
                     processedOrders.length + (currentPage - 1) * itemsPerPage
                   )}
                 </span>{' '}
-                of <span className="font-medium">{OrderData.length}</span> results
+                of <span className="font-medium">{orders.length}</span> results
               </div>
               <div className="flex space-x-2">
                 <button
@@ -238,4 +251,4 @@ const OrdersRecived = () => {
   );
 };
 
-export default OrdersRecived;
+export default supplierOrder;
