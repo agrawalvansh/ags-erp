@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaUser, FaLock } from 'react-icons/fa'; // icons
+import { FaUser, FaLock } from 'react-icons/fa';
 import { FiArrowRight } from 'react-icons/fi';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
@@ -14,8 +14,8 @@ const LoginPage = () => {
     password: ''
   });
   const [error, setError] = useState('');
-  const ENV_USERNAME = import.meta.env.VITE_loginId;
-  const ENV_PASSWORD = import.meta.env.VITE_Password;
+  const ENV_USERNAME = "User";
+  const ENV_PASSWORD = "User1234";
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -62,17 +62,17 @@ const LoginPage = () => {
             transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
           />
 
-          <div className="text-center px-8 z-10 space-y-8">
+          <div className="text-center px-10 z-10 space-y-8">
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl font-bold text-[#caf0f8] mb-6"
+              className="text-4xl font-bold text-[#caf0f8] mb-4"
             >
-              Amit General Stores
+              Enterprise Resource Planning
             </motion.h1>
             
             {/* Feature list with improved accessibility */}
-            <div className="flex flex-col gap-6 text-left">
+            <div className="flex flex-col gap-6 text-left px-12">
               {[
                 "Create Invoices",
                 "Manage Price Lists",
@@ -105,7 +105,7 @@ const LoginPage = () => {
             className="space-y-8"
           >
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-[#05014A]">Welcome Back Amit</h2>
+              <h2 className="text-3xl font-bold text-[#05014A]">Welcome Back User</h2>
               <p className="mt-2 text-[#05014A]/80">Login to continue your business journey</p>
             </div>
 
