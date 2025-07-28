@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, Search, ChevronDown, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
+import { API_BASE } from '../../utils/api';
 // List of suppliers (copy of BuyerAccount but using suppliers endpoints)
 const SupplierAccount = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,7 +16,7 @@ const SupplierAccount = () => {
   useEffect(() => {
     const fetchSuppliers = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/suppliers');
+        const res = await fetch(`${API_BASE}/api/suppliers`);
         if (!res.ok) throw new Error('Failed to fetch suppliers');
         const data = await res.json();
         const mapped = data.map((s) => ({

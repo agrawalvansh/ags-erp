@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
+import { API_BASE } from '../../utils/api';
 
 const AddAccountEntry = () => {
   const { slug, type, id } = useParams(); // type => 'maal' | 'jama'; id present when editing
@@ -35,8 +36,8 @@ const AddAccountEntry = () => {
       try {
         const res = await fetch(
           type === 'maal'
-            ? `http://localhost:4000/api/maal/${id}`
-            : `http://localhost:4000/api/transactions/${id}`
+            ? `${API_BASE}/api/maal/${id}`
+            : `${API_BASE}/api/transactions/${id}`
         );
         if (!res.ok) return;
         const data = await res.json();
@@ -89,10 +90,10 @@ const AddAccountEntry = () => {
       };
 
       if (type === 'maal') {
-        endpoint = `http://localhost:4000/api/maal${isEditing ? `/${id}` : ''}`;
+        endpoint = `${API_BASE}/api/maal${isEditing ? `/${id}` : ''}`;
         payload.invoice_number = formData.invoiceNumber;
       } else {
-        endpoint = `http://localhost:4000/api/transactions${isEditing ? `/${id}` : ''}`;
+        endpoint = `${API_BASE}/api/transactions${isEditing ? `/${id}` : ''}`;
         payload.txn_type = formData.txnType;
       }
 
@@ -124,8 +125,8 @@ const AddAccountEntry = () => {
     setDeleting(true);
     try {
       const endpoint = type === 'maal'
-        ? `http://localhost:4000/api/maal/${id}`
-        : `http://localhost:4000/api/transactions/${id}`;
+        ? `${API_BASE}/api/maal/${id}`
+        : `${API_BASE}/api/transactions/${id}`;
       const res = await fetch(endpoint, { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronDown, Search, Calendar, Edit, ChevronLeft, ChevronRight, Filter, Plus, Phone, MapPin, Building, Save, X } from 'lucide-react';
-
+import { API_BASE } from '../../utils/api';
 // Utility to parse various date formats to a Date object
 export const parseDate = (dateStr) => {
   if (!dateStr) return new Date(0);
@@ -40,7 +40,7 @@ const BuyerAccountDetail = () => {
   // Fetch functions remain the same
   const fetchInvoices = useCallback(async () => {
     try {
-      const resInv = await fetch(`http://localhost:4000/api/customers/${slug}/invoices`);
+      const resInv = await fetch(`${API_BASE}/api/customers/${slug}/invoices`);
       if (resInv.ok) {
         setInvoices(await resInv.json());
       }
@@ -51,7 +51,7 @@ const BuyerAccountDetail = () => {
 
   const fetchTransactions = useCallback(async () => {
     try {
-      const resTx = await fetch(`http://localhost:4000/api/customers/${slug}/transactions`);
+      const resTx = await fetch(`${API_BASE}/api/customers/${slug}/transactions`);
       if (resTx.ok) {
         setTransactions(await resTx.json());
       }
@@ -64,7 +64,7 @@ const BuyerAccountDetail = () => {
     const fetchBuyer = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch('http://localhost:4000/api/customers');
+        const res = await fetch(`${API_BASE}/api/customers/${slug}`);
         if (!res.ok) throw new Error('Failed to fetch customers');
         const customers = await res.json();
         const found = customers.find(c => c.customer_id === slug);
@@ -204,7 +204,7 @@ const BuyerAccountDetail = () => {
         if (editDraft.type === 'maal') {
           // Use original invoice no from rowId (e.g. "M-AGS-I-1") instead of possibly edited draft
           const originalInvoiceNo = rowId.startsWith('M-') ? rowId.slice(2) : rowId;
-          await fetch(`http://localhost:4000/api/maal/${originalInvoiceNo}`, {
+          await fetch(`${API_BASE}/api/maal/${originalInvoiceNo}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -222,7 +222,7 @@ const BuyerAccountDetail = () => {
         } else if (editDraft.type === 'jama') {
           const txnId = editDraft.transactionId ?? editDraft.transaction_id ?? (editDraft.id ? editDraft.id.split('-')[1] : null);
           if (txnId) {
-            await fetch(`http://localhost:4000/api/transactions/${txnId}`, {
+            await fetch(`${API_BASE}/api/transactions/${txnId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

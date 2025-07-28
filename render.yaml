@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sqlite3-backend
+    env: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: sqlite-storage
+      mountPath: /opt/render/db
+      sizeGB: 1

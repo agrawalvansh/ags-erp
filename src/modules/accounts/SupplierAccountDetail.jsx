@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronDown, Search, Calendar, Edit, ChevronLeft, ChevronRight, Filter, Plus, Phone, MapPin, Building, Save, X } from 'lucide-react';
-
+import { API_BASE } from '../../utils/api';
 // Utility to parse various date formats to a Date object
 export const parseDate = (dateStr) => {
   if (!dateStr) return new Date(0);
@@ -40,7 +40,7 @@ const SupplierAccountDetail = () => {
   // Fetch functions remain the same
   const fetchInvoices = useCallback(async () => {
     try {
-      const resInv = await fetch(`http://localhost:4000/api/suppliers/${slug}/maal`);
+      const resInv = await fetch(`${API_BASE}/api/suppliers/${slug}/maal`);
       if (resInv.ok) {
         setInvoices(await resInv.json());
       }
@@ -51,7 +51,7 @@ const SupplierAccountDetail = () => {
 
   const fetchTransactions = useCallback(async () => {
     try {
-      const resTx = await fetch(`http://localhost:4000/api/suppliers/${slug}/transactions`);
+      const resTx = await fetch(`${API_BASE}/api/suppliers/${slug}/transactions`);
       if (resTx.ok) {
         setTransactions(await resTx.json());
       }
@@ -64,7 +64,7 @@ const SupplierAccountDetail = () => {
     const fetchSupplier = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch('http://localhost:4000/api/suppliers');
+        const res = await fetch(`${API_BASE}/api/suppliers`);
         if (!res.ok) throw new Error('Failed to fetch suppliers');
         const suppliers = await res.json();
         const found = suppliers.find(c => c.supplier_id === slug);
@@ -197,7 +197,7 @@ const SupplierAccountDetail = () => {
         if (editDraft.type === 'maal') {
           // Extract numeric maal row id (e.g. "M-12" -> 12)
           const numericId = rowId.startsWith('M-') ? rowId.slice(2) : rowId;
-          await fetch(`http://localhost:4000/api/supplier-maal/${numericId}`, {
+          await fetch(`${API_BASE}/api/supplier-maal/${numericId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -210,7 +210,7 @@ const SupplierAccountDetail = () => {
         } else if (editDraft.type === 'jama') {
           const txnId = editDraft.transactionId ?? editDraft.transaction_id ?? (editDraft.id ? editDraft.id.split('-')[1] : null);
           if (txnId) {
-            await fetch(`http://localhost:4000/api/supplier-transactions/${txnId}`, {
+            await fetch(`${API_BASE}/api/supplier-transactions/${txnId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

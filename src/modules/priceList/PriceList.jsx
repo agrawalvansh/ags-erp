@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronDown, Plus, Search, Eye, EyeOff, Edit } from 'lucide-react';
+import {API_BASE} from '../../utils/api'; 
 
 const PriceList = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const PriceList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/products');
+        const res = await fetch(`${API_BASE}/api/products`);
         const data = await res.json();
         // Normalize keys to match existing table code expectations
         const normalized = data.map(p => ({

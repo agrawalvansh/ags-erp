@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import { Search } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import {API_BASE} from '../../utils/api';
 
 // Add Item Form Component
 // Improved Add Item Form Component
@@ -322,7 +323,7 @@ const Invoice = () => {
     const getNextId = async () => {
       if (!invoiceNo) {
         try {
-          const res = await fetch('http://localhost:4000/api/invoices/next-id');
+          const res = await fetch(`${API_BASE}/api/invoices/next-id`);
           if (res.ok) {
             const data = await res.json();
             setCustomInvoiceNo(data.next_id);
@@ -340,8 +341,8 @@ const Invoice = () => {
     const fetchInitialData = async () => {
       try {
         const [customersRes, productsRes] = await Promise.all([
-          fetch('http://localhost:4000/api/customers'),
-          fetch('http://localhost:4000/api/products')
+          fetch(`${API_BASE}/api/customers`),
+          fetch(`${API_BASE}/api/products`)
         ]);
 
         if (customersRes.ok) {
@@ -366,7 +367,7 @@ const Invoice = () => {
     if (invoiceNo) {
       const fetchInvoice = async () => {
         try {
-          const res = await fetch(`http://localhost:4000/api/invoices/${invoiceNo}`);
+          const res = await fetch(`${API_BASE}/api/invoices/${invoiceNo}`);
           if (res.ok) {
             const inv = await res.json();
             //TODO Work on this
@@ -416,7 +417,7 @@ const Invoice = () => {
             let cust = customers.find(c => c.customer_id === inv.customer_id);
             if (!cust) {
               try {
-                const custRes = await fetch(`http://localhost:4000/api/customers/${inv.customer_id}`);
+                const custRes = await fetch(`${API_BASE}/api/customers/${inv.customer_id}`);
                 if (custRes.ok) {
                   cust = await custRes.json();
                 }
@@ -602,8 +603,8 @@ const Invoice = () => {
 
     try {
       const url = currentInvoiceId
-        ? `http://localhost:4000/api/invoices/${currentInvoiceId}`
-        : 'http://localhost:4000/api/invoices';
+        ? `${API_BASE}/api/invoices/${currentInvoiceId}`
+        : `${API_BASE}/api/invoices`;
 
       const res = await fetch(url, {
         method: currentInvoiceId ? 'PUT' : 'POST',

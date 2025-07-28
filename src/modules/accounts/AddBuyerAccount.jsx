@@ -4,7 +4,7 @@ import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
-
+import { API_BASE } from '../../utils/api'; // Adjust the import path as needed
 const AddBuyerAccount = () => {
   const navigate = useNavigate();
   const { id: paramId } = useParams();
@@ -24,7 +24,7 @@ const AddBuyerAccount = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/customers');
+        const res = await fetch(`${API_BASE}/api/customers`);
         if (!res.ok) throw new Error('Failed to fetch customers');
         const data = await res.json();
 
@@ -61,7 +61,7 @@ const AddBuyerAccount = () => {
     setError('');
 
     try {
-      const url = isEdit ? `http://localhost:4000/api/customers/${customerId}` : 'http://localhost:4000/api/customers';
+      const url = isEdit ? `${API_BASE}/api/customers/${customerId}` : `${API_BASE}/api/customers`;
       const method = isEdit ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -89,7 +89,7 @@ const AddBuyerAccount = () => {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:4000/api/customers/${customerId}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/api/customers/${customerId}`, { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || 'Delete failed');

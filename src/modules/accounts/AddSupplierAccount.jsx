@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
+import { API_BASE } from '../../utils/api'; // Adjust the import path as needed
 
 // Form to create / edit a supplier (mirrors AddBuyerAccount but hits /api/suppliers)
 const AddSupplierAccount = () => {
@@ -24,7 +25,7 @@ const AddSupplierAccount = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/suppliers');
+        const res = await fetch(`${API_BASE}/api/suppliers`);
         if (!res.ok) throw new Error('Failed to fetch suppliers');
         const data = await res.json();
 
@@ -61,7 +62,7 @@ const AddSupplierAccount = () => {
     setError('');
 
     try {
-      const url = isEdit ? `http://localhost:4000/api/suppliers/${supplierId}` : 'http://localhost:4000/api/suppliers';
+      const url = isEdit ? `${API_BASE}/api/suppliers/${supplierId}` : `${API_BASE}/api/suppliers`;
       const method = isEdit ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -88,7 +89,7 @@ const AddSupplierAccount = () => {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:4000/api/suppliers/${supplierId}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/api/suppliers/${supplierId}`, { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || 'Delete failed');

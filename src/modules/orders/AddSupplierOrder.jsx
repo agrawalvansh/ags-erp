@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import { Search } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { API_BASE } from '../../utils/api';
 
 // Add Item Form Component
 // Improved Add Item Form Component
@@ -335,7 +336,7 @@ const order = () => {
     const getNextId = async () => {
       if (!orderNo) {
         try {
-          const res = await fetch('http://localhost:4000/api/supplier-orders/next-id');
+          const res = await fetch(`${API_BASE}/api/supplier-orders/next-id`);
           if (res.ok) {
             const data = await res.json();
             setCustomorderNo(data.next_id);
@@ -353,8 +354,8 @@ const order = () => {
     const fetchInitialData = async () => {
       try {
         const [suppliersRes, productsRes] = await Promise.all([
-          fetch('http://localhost:4000/api/suppliers'),
-          fetch('http://localhost:4000/api/products')
+          fetch(`${API_BASE}/api/suppliers`),
+          fetch(`${API_BASE}/api/products`)
         ]);
 
         if (suppliersRes.ok) {
@@ -379,7 +380,7 @@ const order = () => {
     if (orderNo) {
       const fetchorder = async () => {
         try {
-          const res = await fetch(`http://localhost:4000/api/supplier-orders/${orderNo}`);
+          const res = await fetch(`${API_BASE}/api/supplier-orders/${orderNo}`);
           if (res.ok) {
             const inv = await res.json();
             const processedItems = inv.items.map((item) => {
@@ -573,8 +574,8 @@ const order = () => {
 
     try {
       const url = currentorderId
-        ? `http://localhost:4000/api/supplier-orders/${currentorderId}`
-        : 'http://localhost:4000/api/supplier-orders';
+        ? `${API_BASE}/api/supplier-orders/${currentorderId}`
+        : `${API_BASE}/api/supplier-orders`;
 
       const res = await fetch(url, {
         method: currentorderId ? 'PUT' : 'POST',

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, ChevronDown, Plus, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
+import { API_BASE } from '../../utils/api'; // Adjust the import path as needed
 
 const BuyerAccount = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,7 +16,7 @@ const BuyerAccount = () => {
   useEffect(() => {
     const fetchBuyers = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/customers');
+        const res = await fetch(`${API_BASE}/api/customers`);
         if (!res.ok) throw new Error('Failed to fetch buyers');
         const data = await res.json();
         const mapped = data.map((c) => ({

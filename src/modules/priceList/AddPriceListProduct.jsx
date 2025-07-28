@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
+import { API_BASE } from '../../utils/api'; 
 
 
 const AddPriceListProduct = () => {
@@ -43,7 +44,7 @@ const AddPriceListProduct = () => {
     if (!editing) return;
     const loadProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/products/${paramCode}`);
+        const res = await fetch(`${API_BASE}/api/products/${paramCode}`);
         if (!res.ok) throw new Error('Failed to load product');
         const data = await res.json();
         setFormData({
@@ -100,7 +101,7 @@ const AddPriceListProduct = () => {
     };
 
     try {
-      const endpoint = editing ? `http://localhost:4000/api/products/${paramCode}` : 'http://localhost:4000/api/products';
+      const endpoint = editing ? `${API_BASE}/api/products/${paramCode}` : `${API_BASE}/api/products`;
       const method = editing ? 'PUT' : 'POST';
       const response = await fetch(endpoint, {
         method,
@@ -127,7 +128,7 @@ const AddPriceListProduct = () => {
 
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:4000/api/products/${paramCode}`, {
+      const res = await fetch(`${API_BASE}/api/products/${paramCode}`, {
         method: 'DELETE',
       });
       if (!res.ok) {

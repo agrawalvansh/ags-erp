@@ -2,8 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ChevronDown, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-
-// Remove mock data; will fetch from API
+import { API_BASE } from '../../utils/api'; 
 
 const supplierOrder = () => {
   const navigate = useNavigate();
@@ -15,7 +14,7 @@ const supplierOrder = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/supplier-orders');
+        const res = await fetch(`${API_BASE}/api/supplier-orders`);
         if (res.ok) {
           const data = await res.json();
           setOrders(data);

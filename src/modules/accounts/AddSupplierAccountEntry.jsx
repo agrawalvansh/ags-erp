@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
+import { API_BASE } from '../../utils/api'; // Adjust the import path as needed
 
 // Reusable form for creating supplier maal / jama entries
 const AddSupplierAccountEntry = () => {
@@ -35,8 +36,8 @@ const AddSupplierAccountEntry = () => {
     const load = async () => {
       try {
         const endpoint = type === 'maal'
-          ? `http://localhost:4000/api/suppliers/${slug}/maal`
-          : `http://localhost:4000/api/suppliers/${slug}/transactions`;
+          ? `${API_BASE}/api/suppliers/${slug}/maal`
+          : `${API_BASE}/api/suppliers/${slug}/transactions`;
         const res = await fetch(endpoint);
         if (!res.ok) return;
         const arr = await res.json();
@@ -97,10 +98,10 @@ const AddSupplierAccountEntry = () => {
       let endpoint = '';
       let method = 'POST';
       if (type === 'maal') {
-        endpoint = `http://localhost:4000/api/supplier-maal${isEditing ? `/${recordId}` : ''}`;
+        endpoint = `${API_BASE}/api/supplier-maal${isEditing ? `/${recordId}` : ''}`;
         payload.invoice_number = formData.invoiceNumber;
       } else {
-        endpoint = `http://localhost:4000/api/supplier-transactions${isEditing ? `/${recordId}` : ''}`;
+        endpoint = `${API_BASE}/api/supplier-transactions${isEditing ? `/${recordId}` : ''}`;
         payload.txn_type = formData.txnType;
       }
       if (isEditing) method = 'PUT';
@@ -128,8 +129,8 @@ const AddSupplierAccountEntry = () => {
     setDeleting(true);
     try {
       const endpoint = type === 'maal'
-        ? `http://localhost:4000/api/supplier-maal/${recordId}`
-        : `http://localhost:4000/api/supplier-transactions/${recordId}`;
+        ? `${API_BASE}/api/supplier-maal/${recordId}`
+        : `${API_BASE}/api/supplier-transactions/${recordId}`;
       const res = await fetch(endpoint, { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
