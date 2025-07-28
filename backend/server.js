@@ -10,7 +10,7 @@ db.pragma('foreign_keys = ON');
 const ensureProductStmt = db.prepare('INSERT OR IGNORE INTO products (code, name) VALUES (?, ?)');
 
 const app = express();
-app.use(cors());              // allow requests from your React app
+app.use(cors());            // allow requests from your React app
 app.use(express.json());      // parse JSON bodies
 
 // Example: create a new customer

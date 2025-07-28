@@ -5,7 +5,12 @@
 const Database = require('better-sqlite3');
 // Open (or create) the SQLite database file `erp.db`
 // `verbose: console.log` logs all SQL statements for debugging.
-const db = new Database('erp.db', { verbose: console.log });
+const path = require('path');
+
+// Use environment variable or fallback to local file
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'erp.db');
+const db = new Database(dbPath, { verbose: console.log });
+
 
 // 1. Master Data
 
