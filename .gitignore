@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.pem
+sql-key.pem
+vansh-key.pem
+.env.local

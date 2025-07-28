@@ -919,7 +919,8 @@ app.get('/api/suppliers/:id/transactions', (req, res) => {
 // (end invoices routes)
 // -----------------------
 
+// at the bottom of server.js
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`API server listening on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`API server listening on port ${PORT}`);
 });
