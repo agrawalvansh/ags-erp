@@ -1,6 +1,8 @@
 # AGS ERP – Offline Inventory & Accounting Suite
 
-AGS ERP is a lightweight, **100 % offline** Enterprise Resource Planning system designed for Indian SMEs that still rely on pen-and-paper billing.  It bundles an elegant React + Tailwind UI with a blazing-fast Node/Express + SQLite API, giving you everything you need to manage products, invoices, orders and ledgers without internet connectivity or monthly fees.
+AGS ERP is a lightweight, **100 % offline** Enterprise Resource Planning Desktop Application and a cloud-based web platform designed for Indian SMEs that still rely on pen-and-paper billing.
+Built with React.js, Node.js and SQLite for backend/data, Electron.js with IPC for desktop offline mode, and deployed the
+online version on Vercel and AWS EC2 secured via Cloudflare Tunnel, PM2 and systemd to deploy the Express API securely, giving you everything you need to manage products, invoices, orders and ledgers without internet connectivity or monthly fees.
 
 ---
 
@@ -23,24 +25,8 @@ AGS ERP is a lightweight, **100 % offline** Enterprise Resource Planning system 
 | Layer       | Technology |
 |-------------|------------|
 | Frontend    | React 19 • Vite 6 • Tailwind CSS 4 • React-Router 7 • Lucide-React • Framer-Motion |
-| Backend     | Node.js ≥ 20 • Express 5 • better-sqlite3 • CORS |
+| Backend     | Node.js ≥ 20 • Express 5 • better-sqlite3 • AWS EC2 • Cloudflare Tunnel |
 | Database    | SQLite 3 (file: `backend/erp.db`) |
-
----
-
-## ⚙️ Architecture
-
-```
-┌─────────────┐   HTTP/REST    ┌──────────────────────┐
-│   React UI  │ ⟷  localhost  │ Express API (Node)   │──┐
-│  (Vite dev) │  :5173 / 80    └──────────────────────┘  │
-└─────────────┘                    │ SQLite (better-sqlite3)
-                                   ▼
-                               erp.db (file)
-```
-
-* In development the React dev-server runs on **:5173** with live-reload while the API listens on **:4000** (configurable).  
-* In production the front-end is pre-built into `/dist` and can be served by any static host **or** by Express itself (see below).
 
 ---
 
@@ -65,6 +51,36 @@ AGS
 ├─ vite.config.js         # Vite config
 └─ README.md
 ```
+
+---
+
+## ⚙️ Architecture
+
+![Architecture](./public/AGS%20ERP%20Production%20Architecture.png)
+
+* In development the React dev-server runs on **:5173** with live-reload while the API listens on **:4000** (configurable).  
+* In production the front-end is pre-built into `/dist` and can be served by any static host **or** by Express itself (see below).
+
+---
+## 🛠️ Design Overview
+
+The AGS ERP application follows a classic **client-server** model while remaining completely _offline-first_. At a glance:
+
+1. **React UI (Vite)** – Functional components & hooks render pages, manage local state, and call the API with the native `fetch` client. Each feature (Invoices, Accounts, Orders…) lives inside its own _module_ directory under `src/modules`, keeping concerns isolated.
+2. **Express REST API** – A thin Node.js layer exposing CRUD endpoints under `/api/*`.  It contains no ORM – instead it uses **better-sqlite3** for fast, synchronous SQL that keeps the codebase tiny and predictable.
+3. **SQLite database (`erp.db`)** – A single-file relational DB stored beside the API.  All tables are created / migrated automatically on boot from `backend/db.js`, so there is _zero_ manual DBA work.
+4. **Data Flow** –
+   ```mermaid
+   graph LR;
+     UI[React Component] -- HTTP JSON --> API[Express Route]
+     API -- SQL --> DB[(SQLite)]
+     DB -- rows --> API --> UI
+   ```
+5. **Offline-first UX** – Because everything runs locally, page loads and queries are instant and never break due to network issues.  Future optional cloud-sync will push/merge the same SQLite data to a remote server when connectivity is available.
+6. **Error Handling** – API routes wrap DB operations with `try/catch`, returning status codes + JSON messages that components surface with toast notifications.
+7. **Extensibility** – Adding a new master or transaction type usually needs _one_ new table in `db.js`, plus its route file and a small React module – no complicated boilerplate.
+
+👉  **Need the full deployment playbook?**  Check the dedicated guide: [Deployment Guide](./Deployment.md)
 
 ---
 
