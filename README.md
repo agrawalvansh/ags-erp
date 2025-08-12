@@ -1,10 +1,25 @@
-# AGS ERP – Offline Inventory & Accounting Suite
+# AGS ERP – Web + Offline Desktop Inventory & Accounting Suite
 
-AGS ERP is a lightweight, **100 % offline** Enterprise Resource Planning Desktop Application and a cloud-based web platform designed for Indian SMEs that still rely on pen-and-paper billing.
-Built with React.js, Node.js and SQLite for backend/data, Electron.js with IPC for desktop offline mode, and deployed the
-online version on Vercel and AWS EC2 secured via Cloudflare Tunnel, PM2 and systemd to deploy the Express API securely, giving you everything you need to manage products, invoices, orders and ledgers without internet connectivity or monthly fees.
+AGS ERP is a lightweight ERP that runs in two variants:
+
+- **Offline Desktop App (Electron)** – 100% local, no internet required. Ideal for shops that prefer on‑prem usage with a simple installer.
+- **Web App (Cloud)** – Deployed to Vercel (frontend) and AWS EC2 (API), secured via Cloudflare Tunnel/PM2/systemd.
+
+Built with React.js, Node.js and SQLite, with Electron.js + IPC for the desktop app. Manage products, invoices, orders and ledgers without monthly fees.
 
 ---
+
+## 🧭 Variants: Web vs Desktop
+
+- **Web App (Cloud)**
+  - Frontend served from `/dist` on any static host (e.g., Vercel)
+  - API on AWS EC2 (Express), typically behind Cloudflare Tunnel with PM2/systemd
+  - Best for distributed access and remote availability
+
+- **Offline Desktop App (Electron)**
+  - Bundles the React UI with an embedded Express + SQLite runtime
+  - Data stored locally in a single SQLite file
+  - Best for single‑machine usage with no dependency on the internet
 
 ## ✨ Feature Highlights
 
@@ -27,6 +42,7 @@ online version on Vercel and AWS EC2 secured via Cloudflare Tunnel, PM2 and syst
 | Frontend    | React 19 • Vite 6 • Tailwind CSS 4 • React-Router 7 • Lucide-React • Framer-Motion |
 | Backend     | Node.js ≥ 20 • Express 5 • better-sqlite3 • AWS EC2 • Cloudflare Tunnel |
 | Database    | SQLite 3 (file: `backend/erp.db`) |
+| Desktop Shell | Electron (IPC) |
 
 ---
 
@@ -86,6 +102,10 @@ The AGS ERP application follows a classic **client-server** model while remainin
 
 ## 🚀 Getting Started
 
+Choose your target and follow the respective steps.
+
+### A) Web App (Cloud)
+
 1. **Prerequisites**  
    • Node.js ≥ 20 ‑ download from <https://nodejs.org/>  
    • Git (for cloning)  
@@ -126,6 +146,45 @@ The AGS ERP application follows a classic **client-server** model while remainin
    );
    ```
    Now `npm start` inside `backend` will serve both API and UI from **:4000**.
+
+---
+
+### B) Offline Desktop App (Electron)
+
+This variant lives in a dedicated branch that contains the Electron wrapper and packaging config. General guidance:
+
+1. **Prerequisites**  
+   • Node.js ≥ 20  
+   • Git  
+   • Build tools for native modules (required by `better-sqlite3`)  
+     - Windows: Visual Studio Build Tools + Python (via windows-build-tools)  
+     - macOS: Xcode Command Line Tools  
+     - Linux: `build-essential`, Python
+
+2. **Clone & install**  
+   - Checkout the desktop branch that contains Electron integration.  
+   - Install root and backend dependencies:  
+     ```bash
+     npm install
+     ```
+
+3. **Run in Development**  
+   - Start the Electron shell:  
+     ```bash
+     npm run dev
+     ```
+
+4. **Build Desktop Installer**  
+   - Use the packaging script provided in the desktop branch:  
+     ```bash
+     npm run build
+     ```
+
+5. **Data Location (Desktop)**  
+   - The app stores the SQLite DB in the OS‑specific user data directory (e.g., `app.getPath('userData')`), ensuring write access and per‑user isolation.  
+   - Do not hardcode paths like `./erp.db` for production builds.
+
+> Tip: Refer to the README within the desktop branch for exact script names and packager options.
 
 ---
 
@@ -171,10 +230,9 @@ All endpoints accept/return **JSON**.
 
 ## 🛠 Environment Variables
 
-Create a `.env` in project root (values shown are defaults):
+Create a `.env` in project root only for Website (values shown are defaults):
 ```
-PORT=4000             # API port
-DATABASE_PATH=erp.db  # Relative to backend/
+VITE_API_URL=https://api.amitgeneralstore.software/  #API URL
 ```
 
 ---
@@ -193,15 +251,27 @@ Inside **backend**:
 | `npm run dev`   | Nodemon auto-reload API           |
 | `npm start`     | Start API without nodemon         |
 
+For the **Desktop App (Electron)**, the exact script names (e.g., `electron:dev`, `electron:build`) are defined in the desktop branch `package.json`.
+
 ---
 
-## 🛣 Roadmap
+## 💽 Desktop Packaging Notes (SQLite + Electron)
 
-- 🔐 Authentication & user roles  
-- 🧾 GST/tax modules & e-way bill  
-- 📊 Reports dashboard (sales, stock, outstanding)  
-- 🖥 Electron/TAURI wrapper for one-click desktop installer  
-- ☁️ Optional cloud sync
+- **Module resolution in asar**  
+  Use relative requires: `require('./module')` instead of `require(path.join(__dirname, 'module'))` to avoid resolution issues when packaged.
+
+- **Writable database path**  
+  Do not write to the app bundle. Use Electron’s `app.getPath('userData')` and place the DB there, e.g.:  
+  ```js
+  const { app } = require('electron');
+  const path = require('path');
+  const dbPath = path.join(app.getPath('userData'), 'erp.db');
+  ```
+
+- **better-sqlite3**  
+  Ensure `better-sqlite3` is in `dependencies` (not `devDependencies`). For packaged builds, rebuild native modules as needed (e.g., `electron-rebuild`).
+
+These practices ensure the desktop build works reliably in both development and packaged installers.
 
 ---
 
